@@ -1,0 +1,26 @@
+{
+  "action": {
+    "approve": "Approve",
+    "cancel": "Cancel",
+    "reject": "Reject"
+  },
+  "app": {
+    "name": "Orchestrato"
+  },
+  "approval": {
+    "prompt": "Approval required"
+  },
+  "status": {
+    "awaiting_approval": "Awaiting approval",
+    "blocked": "Blocked",
+    "cancelled": "Cancelled",
+    "completed": "Completed",
+    "executing": "Executing",
+    "failed": "Failed",
+    "intake": "Intake",
+    "planning": "Planning",
+    "recovering": "Recovering",
+    "reviewing": "Reviewing",
+    "verifying": "Verifying"
+  }
+}

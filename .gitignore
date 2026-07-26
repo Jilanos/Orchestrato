@@ -1,0 +1,24 @@
+AGENTS.md
+LOGICS.md
+
+# Orchestrato runtime state
+.orchestrato/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+dist/
+*.egg-info/
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store

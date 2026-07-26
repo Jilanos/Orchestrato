@@ -1,0 +1,584 @@
+{
+  "budgets": {
+    "max_docs": 64,
+    "max_docs_per_ref": 8
+  },
+  "changed_paths": [],
+  "command": "logics-manager sync context-pack req_000_deliver_the_orchestrato_conversational_orchestration_mvp item_001_build_the_repository_scoped_conversational_cli item_002_define_agent_profiles_and_deterministic_routing_policy item_003_integrate_the_cdx_manager_headless_execution_contract item_004_integrate_logics_planning_and_bounded_handoffs item_005_implement_finite_supervision_review_and_recovery item_006_add_local_persistence_observability_and_contract_tests task_001_orchestrate_delivery_of_the_orchestrato_mvp --mode summary-only --profile deep --handoff",
+  "companion_docs": [
+    {
+      "kind": "product",
+      "linked_refs": {
+        "adr": [
+          "adr_001_keep_orchestrato_behind_cli_contracts",
+          "adr_002_use_a_persisted_finite_orchestration_state_machine"
+        ],
+        "item": [
+          "item_001_build_the_repository_scoped_conversational_cli",
+          "item_002_define_agent_profiles_and_deterministic_routing_policy",
+          "item_003_integrate_the_cdx_manager_headless_execution_contract",
+          "item_004_integrate_logics_planning_and_bounded_handoffs",
+          "item_005_implement_finite_supervision_review_and_recovery",
+          "item_006_add_local_persistence_observability_and_contract_tests"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "road": [
+          "road_001_orchestrato_product_roadmap"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/product/prod_001_orchestrato_mvp_product_brief.md",
+      "ref": "prod_001_orchestrato_mvp_product_brief",
+      "status": "Settled",
+      "title": "Orchestrato MVP product brief"
+    },
+    {
+      "kind": "architecture",
+      "linked_refs": {
+        "adr": [
+          "adr_001_keep_orchestrato_behind_cli_contracts"
+        ],
+        "item": [
+          "item_003_integrate_the_cdx_manager_headless_execution_contract"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/architecture/adr_001_keep_orchestrato_behind_cli_contracts.md",
+      "ref": "adr_001_keep_orchestrato_behind_cli_contracts",
+      "status": "Proposed",
+      "title": "Keep Orchestrato behind CLI contracts"
+    },
+    {
+      "kind": "architecture",
+      "linked_refs": {
+        "adr": [
+          "adr_002_use_a_persisted_finite_orchestration_state_machine"
+        ],
+        "item": [
+          "item_005_implement_finite_supervision_review_and_recovery"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/architecture/adr_002_use_a_persisted_finite_orchestration_state_machine.md",
+      "ref": "adr_002_use_a_persisted_finite_orchestration_state_machine",
+      "status": "Proposed",
+      "title": "Use a persisted finite orchestration state machine"
+    },
+    {
+      "kind": "roadmap",
+      "linked_refs": {
+        "item": [
+          "item_001_build_the_repository_scoped_conversational_cli",
+          "item_002_define_agent_profiles_and_deterministic_routing_policy",
+          "item_003_integrate_the_cdx_manager_headless_execution_contract",
+          "item_004_integrate_logics_planning_and_bounded_handoffs",
+          "item_005_implement_finite_supervision_review_and_recovery",
+          "item_006_add_local_persistence_observability_and_contract_tests"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "road": [
+          "road_001_orchestrato_product_roadmap"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/roadmap/road_001_orchestrato_product_roadmap.md",
+      "ref": "road_001_orchestrato_product_roadmap",
+      "status": "Proposed",
+      "title": "Orchestrato product roadmap"
+    }
+  ],
+  "docs": [
+    {
+      "ai_context": {
+        "keywords": "request-chain-scaffold, deliver the orchestrato conversational orchestration mvp, development-ready",
+        "skip when": "The change is unrelated to this scaffolded request chain.",
+        "summary": "Deliver the Orchestrato conversational orchestration MVP",
+        "use when": "You need to implement or review the scaffolded workflow for Deliver the Orchestrato conversational orchestration MVP."
+      },
+      "kind": "request",
+      "linked_refs": {
+        "adr": [
+          "adr_001_keep_orchestrato_behind_cli_contracts",
+          "adr_002_use_a_persisted_finite_orchestration_state_machine"
+        ],
+        "item": [
+          "item_001_build_the_repository_scoped_conversational_cli",
+          "item_002_define_agent_profiles_and_deterministic_routing_policy",
+          "item_003_integrate_the_cdx_manager_headless_execution_contract",
+          "item_004_integrate_logics_planning_and_bounded_handoffs",
+          "item_005_implement_finite_supervision_review_and_recovery",
+          "item_006_add_local_persistence_observability_and_contract_tests"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ]
+      },
+      "path": "logics/request/req_000_deliver_the_orchestrato_conversational_orchestration_mvp.md",
+      "ref": "req_000_deliver_the_orchestrato_conversational_orchestration_mvp",
+      "schema_version": "1.0",
+      "status": "Draft",
+      "title": "Deliver the Orchestrato conversational orchestration MVP"
+    },
+    {
+      "ai_context": {
+        "keywords": "scaffolded-backlog, build the repository-scoped conversational cli, implementation-ready",
+        "skip when": "The change belongs to another backlog slice.",
+        "summary": "Build the repository-scoped conversational CLI",
+        "use when": "Implementing the scaffolded slice for Build the repository-scoped conversational CLI."
+      },
+      "kind": "backlog",
+      "linked_refs": {
+        "item": [
+          "item_001_build_the_repository_scoped_conversational_cli"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/backlog/item_001_build_the_repository_scoped_conversational_cli.md",
+      "ref": "item_001_build_the_repository_scoped_conversational_cli",
+      "schema_version": "1.0",
+      "status": "Ready",
+      "title": "Build the repository-scoped conversational CLI"
+    },
+    {
+      "ai_context": {
+        "keywords": "scaffolded-backlog, define agent profiles and deterministic routing policy, implementation-ready",
+        "skip when": "The change belongs to another backlog slice.",
+        "summary": "Define agent profiles and deterministic routing policy",
+        "use when": "Implementing the scaffolded slice for Define agent profiles and deterministic routing policy."
+      },
+      "kind": "backlog",
+      "linked_refs": {
+        "item": [
+          "item_002_define_agent_profiles_and_deterministic_routing_policy"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/backlog/item_002_define_agent_profiles_and_deterministic_routing_policy.md",
+      "ref": "item_002_define_agent_profiles_and_deterministic_routing_policy",
+      "schema_version": "1.0",
+      "status": "Ready",
+      "title": "Define agent profiles and deterministic routing policy"
+    },
+    {
+      "ai_context": {
+        "keywords": "scaffolded-backlog, integrate the cdx-manager headless execution contract, implementation-ready",
+        "skip when": "The change belongs to another backlog slice.",
+        "summary": "Integrate the cdx-manager headless execution contract",
+        "use when": "Implementing the scaffolded slice for Integrate the cdx-manager headless execution contract."
+      },
+      "kind": "backlog",
+      "linked_refs": {
+        "item": [
+          "item_003_integrate_the_cdx_manager_headless_execution_contract"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/backlog/item_003_integrate_the_cdx_manager_headless_execution_contract.md",
+      "ref": "item_003_integrate_the_cdx_manager_headless_execution_contract",
+      "schema_version": "1.0",
+      "status": "Ready",
+      "title": "Integrate the cdx-manager headless execution contract"
+    },
+    {
+      "ai_context": {
+        "keywords": "scaffolded-backlog, integrate logics planning and bounded handoffs, implementation-ready",
+        "skip when": "The change belongs to another backlog slice.",
+        "summary": "Integrate Logics planning and bounded handoffs",
+        "use when": "Implementing the scaffolded slice for Integrate Logics planning and bounded handoffs."
+      },
+      "kind": "backlog",
+      "linked_refs": {
+        "item": [
+          "item_004_integrate_logics_planning_and_bounded_handoffs"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/backlog/item_004_integrate_logics_planning_and_bounded_handoffs.md",
+      "ref": "item_004_integrate_logics_planning_and_bounded_handoffs",
+      "schema_version": "1.0",
+      "status": "Ready",
+      "title": "Integrate Logics planning and bounded handoffs"
+    },
+    {
+      "ai_context": {
+        "keywords": "scaffolded-backlog, implement finite supervision, review, and recovery, implementation-ready",
+        "skip when": "The change belongs to another backlog slice.",
+        "summary": "Implement finite supervision, review, and recovery",
+        "use when": "Implementing the scaffolded slice for Implement finite supervision, review, and recovery."
+      },
+      "kind": "backlog",
+      "linked_refs": {
+        "item": [
+          "item_005_implement_finite_supervision_review_and_recovery"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/backlog/item_005_implement_finite_supervision_review_and_recovery.md",
+      "ref": "item_005_implement_finite_supervision_review_and_recovery",
+      "schema_version": "1.0",
+      "status": "Ready",
+      "title": "Implement finite supervision, review, and recovery"
+    },
+    {
+      "ai_context": {
+        "keywords": "scaffolded-backlog, add local persistence, observability, and contract tests, implementation-ready",
+        "skip when": "The change belongs to another backlog slice.",
+        "summary": "Add local persistence, observability, and contract tests",
+        "use when": "Implementing the scaffolded slice for Add local persistence, observability, and contract tests."
+      },
+      "kind": "backlog",
+      "linked_refs": {
+        "item": [
+          "item_006_add_local_persistence_observability_and_contract_tests"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/backlog/item_006_add_local_persistence_observability_and_contract_tests.md",
+      "ref": "item_006_add_local_persistence_observability_and_contract_tests",
+      "schema_version": "1.0",
+      "status": "Ready",
+      "title": "Add local persistence, observability, and contract tests"
+    },
+    {
+      "ai_context": {},
+      "kind": "product",
+      "linked_refs": {
+        "adr": [
+          "adr_001_keep_orchestrato_behind_cli_contracts",
+          "adr_002_use_a_persisted_finite_orchestration_state_machine"
+        ],
+        "item": [
+          "item_001_build_the_repository_scoped_conversational_cli",
+          "item_002_define_agent_profiles_and_deterministic_routing_policy",
+          "item_003_integrate_the_cdx_manager_headless_execution_contract",
+          "item_004_integrate_logics_planning_and_bounded_handoffs",
+          "item_005_implement_finite_supervision_review_and_recovery",
+          "item_006_add_local_persistence_observability_and_contract_tests"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "road": [
+          "road_001_orchestrato_product_roadmap"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/product/prod_001_orchestrato_mvp_product_brief.md",
+      "ref": "prod_001_orchestrato_mvp_product_brief",
+      "schema_version": "1.0",
+      "status": "Settled",
+      "title": "Orchestrato MVP product brief"
+    },
+    {
+      "ai_context": {
+        "keywords": "scaffolded-task, request-chain-scaffold, orchestration",
+        "skip when": "Working on one isolated sibling slice.",
+        "summary": "Orchestrate delivery of the Orchestrato MVP",
+        "use when": "Coordinating implementation of a scaffolded request chain."
+      },
+      "kind": "task",
+      "linked_refs": {
+        "adr": [
+          "adr_001_keep_orchestrato_behind_cli_contracts",
+          "adr_002_use_a_persisted_finite_orchestration_state_machine"
+        ],
+        "item": [
+          "item_001_build_the_repository_scoped_conversational_cli",
+          "item_002_define_agent_profiles_and_deterministic_routing_policy",
+          "item_003_integrate_the_cdx_manager_headless_execution_contract",
+          "item_004_integrate_logics_planning_and_bounded_handoffs",
+          "item_005_implement_finite_supervision_review_and_recovery",
+          "item_006_add_local_persistence_observability_and_contract_tests"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/tasks/task_001_orchestrate_delivery_of_the_orchestrato_mvp.md",
+      "ref": "task_001_orchestrate_delivery_of_the_orchestrato_mvp",
+      "schema_version": "1.0",
+      "status": "Ready",
+      "title": "Orchestrate delivery of the Orchestrato MVP"
+    },
+    {
+      "ai_context": {
+        "keywords": "roadmap, orchestration, fake-runtime, live-integration, worktrees, autonomy",
+        "skip when": "You need execution details for a single backlog item or task.",
+        "summary": "Sequence Orchestrato from an offline vertical slice to guarded long-running delivery.",
+        "use when": "Planning scope, dependencies, or release boundaries across Orchestrato versions."
+      },
+      "kind": "roadmap",
+      "linked_refs": {
+        "item": [
+          "item_001_build_the_repository_scoped_conversational_cli",
+          "item_002_define_agent_profiles_and_deterministic_routing_policy",
+          "item_003_integrate_the_cdx_manager_headless_execution_contract",
+          "item_004_integrate_logics_planning_and_bounded_handoffs",
+          "item_005_implement_finite_supervision_review_and_recovery",
+          "item_006_add_local_persistence_observability_and_contract_tests"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "road": [
+          "road_001_orchestrato_product_roadmap"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/roadmap/road_001_orchestrato_product_roadmap.md",
+      "ref": "road_001_orchestrato_product_roadmap",
+      "schema_version": "1.0",
+      "status": "Proposed",
+      "title": "Orchestrato product roadmap"
+    },
+    {
+      "ai_context": {},
+      "kind": "architecture",
+      "linked_refs": {
+        "adr": [
+          "adr_001_keep_orchestrato_behind_cli_contracts"
+        ],
+        "item": [
+          "item_003_integrate_the_cdx_manager_headless_execution_contract"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/architecture/adr_001_keep_orchestrato_behind_cli_contracts.md",
+      "ref": "adr_001_keep_orchestrato_behind_cli_contracts",
+      "schema_version": "1.0",
+      "status": "Proposed",
+      "title": "Keep Orchestrato behind CLI contracts"
+    },
+    {
+      "ai_context": {},
+      "kind": "architecture",
+      "linked_refs": {
+        "adr": [
+          "adr_002_use_a_persisted_finite_orchestration_state_machine"
+        ],
+        "item": [
+          "item_005_implement_finite_supervision_review_and_recovery"
+        ],
+        "prod": [
+          "prod_001_orchestrato_mvp_product_brief"
+        ],
+        "req": [
+          "req_000_deliver_the_orchestrato_conversational_orchestration_mvp"
+        ],
+        "task": [
+          "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+        ]
+      },
+      "path": "logics/architecture/adr_002_use_a_persisted_finite_orchestration_state_machine.md",
+      "ref": "adr_002_use_a_persisted_finite_orchestration_state_machine",
+      "schema_version": "1.0",
+      "status": "Proposed",
+      "title": "Use a persisted finite orchestration state machine"
+    }
+  ],
+  "estimates": {
+    "char_count": 14762,
+    "companion_doc_count": 4,
+    "doc_count": 12
+  },
+  "generated_at": "2026-07-26T21:15:23Z",
+  "handoff": {
+    "companion_doc_count": 4,
+    "enabled": true,
+    "source_refs": [
+      "req_000_deliver_the_orchestrato_conversational_orchestration_mvp",
+      "item_001_build_the_repository_scoped_conversational_cli",
+      "item_002_define_agent_profiles_and_deterministic_routing_policy",
+      "item_003_integrate_the_cdx_manager_headless_execution_contract",
+      "item_004_integrate_logics_planning_and_bounded_handoffs",
+      "item_005_implement_finite_supervision_review_and_recovery",
+      "item_006_add_local_persistence_observability_and_contract_tests",
+      "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+    ],
+    "validation_summary_count": 1
+  },
+  "i18n": {
+    "actions": [
+      "Keep catalogs valid with logics-manager i18n validate in the project quality gate."
+    ],
+    "applicable": true,
+    "catalogs": {
+      "en": 16
+    },
+    "configured": true,
+    "contract": {
+      "applicability": "applicable",
+      "catalog": {
+        "path": "src/i18n/{locale}.json"
+      },
+      "default_locale": "en",
+      "fallback_locale": "en",
+      "locales": [
+        "en"
+      ],
+      "schema_version": "1.0",
+      "source_locale": "en"
+    },
+    "contract_path": "logics/i18n/contract.json",
+    "findings": [],
+    "next_action": "The i18n contract is valid.",
+    "ok": true,
+    "state": "valid"
+  },
+  "mode": "summary-only",
+  "profile": "deep",
+  "ref": "req_000_deliver_the_orchestrato_conversational_orchestration_mvp,item_001_build_the_repository_scoped_conversational_cli,item_002_define_agent_profiles_and_deterministic_routing_policy,item_003_integrate_the_cdx_manager_headless_execution_contract,item_004_integrate_logics_planning_and_bounded_handoffs,item_005_implement_finite_supervision_review_and_recovery,item_006_add_local_persistence_observability_and_contract_tests,task_001_orchestrate_delivery_of_the_orchestrato_mvp",
+  "refs": [
+    "req_000_deliver_the_orchestrato_conversational_orchestration_mvp",
+    "item_001_build_the_repository_scoped_conversational_cli",
+    "item_002_define_agent_profiles_and_deterministic_routing_policy",
+    "item_003_integrate_the_cdx_manager_headless_execution_contract",
+    "item_004_integrate_logics_planning_and_bounded_handoffs",
+    "item_005_implement_finite_supervision_review_and_recovery",
+    "item_006_add_local_persistence_observability_and_contract_tests",
+    "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+  ],
+  "release": {
+    "blocking_reasons": [
+      "Missing logics/release/contract.json."
+    ],
+    "configured": false,
+    "contract_path": "logics/release/contract.json",
+    "guidance": [
+      "Release readiness must come from project-owned evidence, not conversational memory.",
+      "Use release status or validate before preparing or claiming release readiness.",
+      "Publication-oriented actions are explicit operator actions and are separate from safe read/validate actions."
+    ],
+    "next_action": "Run logics-manager release discover --write, then review and promote logics/release/contract.draft.json to logics/release/contract.json.",
+    "publication_actions": [
+      "GitHub release publication",
+      "external publication"
+    ],
+    "required_gates": [],
+    "safe_actions": [
+      "logics-manager release status",
+      "logics-manager release plan <version>",
+      "logics-manager release validate <version>"
+    ],
+    "state": "not_configured",
+    "target_version": null
+  },
+  "validation_summary": [
+    {
+      "items": [
+        "- Run the project unit and contract test suites.",
+        "- Run the offline fake-runtime end-to-end scenario.",
+        "- Run `logics-manager flow validate` for the active request chain.",
+        "- Run `logics-manager lint --require-status`.",
+        "- Run `logics-manager audit --group-by-doc`."
+      ],
+      "path": "logics/tasks/task_001_orchestrate_delivery_of_the_orchestrato_mvp.md",
+      "ref": "task_001_orchestrate_delivery_of_the_orchestrato_mvp"
+    }
+  ]
+}

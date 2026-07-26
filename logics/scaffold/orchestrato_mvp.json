@@ -1,0 +1,242 @@
+{
+  "title": "Deliver the Orchestrato conversational orchestration MVP",
+  "references": [
+    "README.md",
+    "docs/product.md",
+    "docs/architecture.md",
+    "Sibling repository: cdx-manager headless automation product contract",
+    "Sibling repository: cdx-manager provider-native headless run boundary"
+  ],
+  "request": {
+    "complexity": "High",
+    "theme": "Agent orchestration",
+    "needs": [
+      "Provide one conversational CLI where an operator can describe development work in natural language.",
+      "Route planning, implementation, recovery, review, and routine repository operations to role-specific agents.",
+      "Use cdx-manager for provider sessions, capacity-aware selection, model choice, permissions, reasoning effort, and run reports.",
+      "Use Logics Manager for durable project intent, bounded context, implementation tasks, and workflow validation.",
+      "Keep every routing decision, handoff, approval, and run outcome inspectable and resumable."
+    ],
+    "context": [
+      "cdx-manager already exposes JSON-first select, run, runs, run-status, and run-report commands for Codex and Claude providers.",
+      "Logics Manager already exposes request-chain scaffolding, lifecycle transitions, context packs, status, lint, audit, and a local viewer.",
+      "The MVP should integrate these CLIs through stable subprocess boundaries instead of importing their internal Python modules.",
+      "Terra, Luna, Sol, Sonnet, Fable, and Opus are configurable orchestration roles or candidates, not hard-coded runtime assumptions.",
+      "The initial operator surface is a local CLI with a compact live status view; a full TUI or web interface is deferred."
+    ],
+    "acceptance_criteria": [
+      "AC1: An operator can start a repository-scoped conversation, submit a development objective, and receive concise progress and a final outcome.",
+      "AC2: A declarative policy maps task intent and risk to an agent role, provider, model candidate, reasoning effort, and permission level, with medium effort as the default.",
+      "AC3: Orchestrato invokes cdx-manager through its JSON CLI contract and records cdx run identifiers, reports, usage, errors, and artifacts without parsing interactive terminal output.",
+      "AC4: Planning work can create or consume a bounded Logics request, backlog, task, and context pack before implementation begins.",
+      "AC5: The supervisor enforces a finite plan-execute-verify-review-recover state machine with retry budgets and explicit stop conditions.",
+      "AC6: Mutating or externally visible actions require policy-defined approval, and only one agent may write to a worktree at a time.",
+      "AC7: A failed execution can produce a bounded diagnostic handoff for a recovery role and, when recovered, resume from the failed step without replaying completed work.",
+      "AC8: Run events, routing decisions, approvals, Logics references, and cost or usage metadata are persisted locally and can be inspected after restart.",
+      "AC9: Provider or model unavailability produces an explainable fallback decision or a clean blocked state instead of silent model substitution.",
+      "AC10: Automated tests exercise orchestration behavior with fake cdx-manager and Logics Manager subprocesses; no live provider account is required for the default test suite."
+    ]
+  },
+  "product": {
+    "title": "Orchestrato MVP product brief",
+    "overview": "A local, inspectable conversational supervisor that coordinates specialized coding agents through cdx-manager and durable delivery workflows through Logics Manager.",
+    "goals": [
+      "Make multi-agent development feel like one continuous Codex-style conversation.",
+      "Select agent capability and reasoning effort according to task value, risk, and runtime availability.",
+      "Turn plans into durable Logics work before code execution when the task requires product or architecture shaping.",
+      "Preserve enough state and evidence to resume, audit, and improve orchestration decisions.",
+      "Deliver a useful local CLI before investing in a richer interface or remote daemon."
+    ],
+    "non_goals": [
+      "Reimplement provider authentication, quota handling, or native agent launch commands.",
+      "Reimplement Logics document parsing, lifecycle transitions, validation, or the browser viewer.",
+      "Run several write-capable agents concurrently in the same worktree.",
+      "Provide unattended deployment, arbitrary destructive actions, or unrestricted long-running autonomy in the MVP.",
+      "Guarantee a specific commercial model name remains available."
+    ]
+  },
+  "backlog_items": [
+    {
+      "title": "Build the repository-scoped conversational CLI",
+      "priority": "High",
+      "complexity": "Medium",
+      "theme": "Operator experience",
+      "request_acs": [
+        "AC1",
+        "AC8"
+      ],
+      "problem": [
+        "The operator needs one low-friction surface for objectives, progress, approvals, status, and resume."
+      ],
+      "scope_in": [
+        "A Python CLI with one-shot and interactive conversation modes.",
+        "Repository discovery, conversation identifiers, slash commands, concise live progress, and final summaries.",
+        "Commands for status, plan, run, approve, reject, resume, and inspect."
+      ],
+      "scope_out": [
+        "A full-screen TUI, browser application, remote server, or multi-user authentication."
+      ],
+      "acceptance_criteria": [
+        "AC1: The CLI accepts an objective in one-shot and interactive modes.",
+        "AC2: The CLI renders stable states and approval prompts without exposing raw provider streams.",
+        "AC3: A previous conversation can be selected and resumed."
+      ]
+    },
+    {
+      "title": "Define agent profiles and deterministic routing policy",
+      "priority": "High",
+      "complexity": "High",
+      "theme": "Routing policy",
+      "request_acs": [
+        "AC2",
+        "AC6",
+        "AC9"
+      ],
+      "problem": [
+        "Agent names, provider models, effort, permissions, and fallbacks need one auditable policy rather than prompt-only conventions."
+      ],
+      "scope_in": [
+        "Declarative role profiles for planner, executor, specialist developer, recovery, reviewer, and routine operations.",
+        "Intent, risk, effort, permission, fallback, and availability rules.",
+        "Medium effort by default, low for routine bounded operations, and high only for recovery or explicitly complex work.",
+        "Explainable routing decisions and clean blocked outcomes."
+      ],
+      "scope_out": [
+        "Machine-learned routing, provider benchmarking, or automatic policy optimization."
+      ],
+      "acceptance_criteria": [
+        "AC1: The same normalized task and runtime snapshot produce the same route.",
+        "AC2: Every route records its matched rule, selected role, effort, permission, and fallback candidates.",
+        "AC3: Unknown roles, unavailable candidates, and unsafe permission escalation fail closed with actionable diagnostics."
+      ]
+    },
+    {
+      "title": "Integrate the cdx-manager headless execution contract",
+      "priority": "High",
+      "complexity": "Medium",
+      "theme": "Runtime integration",
+      "request_acs": [
+        "AC3",
+        "AC7",
+        "AC9"
+      ],
+      "problem": [
+        "Orchestrato needs provider-neutral, observable agent execution without taking ownership of accounts or provider-specific launch flags."
+      ],
+      "scope_in": [
+        "Typed adapters for cdx select, run, run-status, run-report, and cancellation or timeout handling available in the installed contract.",
+        "Prompt-file handoffs, structured result validation, run correlation, usage capture, and artifact references.",
+        "Session selection by provider and minimum reasoning effort."
+      ],
+      "scope_out": [
+        "Direct Codex or Claude SDK integration, authentication storage, or quota scraping."
+      ],
+      "acceptance_criteria": [
+        "AC1: All cdx invocations use JSON mode and validate their schema before changing orchestration state.",
+        "AC2: Provider output is referenced through cdx artifacts and never mixed into Orchestrato protocol output.",
+        "AC3: Timeout, malformed JSON, provider failure, and unavailable-session paths produce typed failures."
+      ]
+    },
+    {
+      "title": "Integrate Logics planning and bounded handoffs",
+      "priority": "High",
+      "complexity": "High",
+      "theme": "Workflow integration",
+      "request_acs": [
+        "AC4",
+        "AC7"
+      ],
+      "problem": [
+        "Plans and task boundaries must survive agent changes and process restarts instead of existing only in conversation transcripts."
+      ],
+      "scope_in": [
+        "Typed adapters for Logics status, health, flow lifecycle, sync context-pack, lint, and audit commands.",
+        "A planning gate that can reuse existing work or create a request chain before implementation.",
+        "Bounded handoff packets containing objective, active Logics refs, acceptance criteria, relevant diffs, and prior run evidence."
+      ],
+      "scope_out": [
+        "Manual parsing or mutation of Logics indicators, lineage links, Mermaid signatures, or status fields.",
+        "A replacement Logics viewer."
+      ],
+      "acceptance_criteria": [
+        "AC1: Planning produces or selects explicit Logics references before an implementation run starts.",
+        "AC2: Agent prompts receive context packs within configurable size limits.",
+        "AC3: Lint and audit failures block closeout and remain visible to the operator."
+      ]
+    },
+    {
+      "title": "Implement finite supervision, review, and recovery",
+      "priority": "High",
+      "complexity": "High",
+      "theme": "Orchestration engine",
+      "request_acs": [
+        "AC5",
+        "AC6",
+        "AC7"
+      ],
+      "problem": [
+        "Multiple capable agents need a finite, resumable control loop that prevents duplicate work, endless retries, and unsafe concurrent writes."
+      ],
+      "scope_in": [
+        "A persisted plan-execute-verify-review-recover state machine.",
+        "Per-step retry, token, time, and agent-switch budgets.",
+        "Independent review after code changes and a recovery role after classified failures.",
+        "One writer lock per worktree and policy approval gates."
+      ],
+      "scope_out": [
+        "Unbounded autonomy, distributed queues, concurrent merge automation, or autonomous deployment."
+      ],
+      "acceptance_criteria": [
+        "AC1: Every state transition is validated and persisted before the next side effect.",
+        "AC2: Retry exhaustion, repeated equivalent failure, or missing approval ends in a clean blocked state.",
+        "AC3: A reviewer cannot approve its own implementation run when an independent provider or role is required.",
+        "AC4: Recovery receives a bounded diagnostic packet and resumes only the failed step."
+      ]
+    },
+    {
+      "title": "Add local persistence, observability, and contract tests",
+      "priority": "Medium",
+      "complexity": "Medium",
+      "theme": "Reliability",
+      "request_acs": [
+        "AC8",
+        "AC10"
+      ],
+      "problem": [
+        "The orchestration engine needs durable evidence and deterministic tests before live multi-agent use is trustworthy."
+      ],
+      "scope_in": [
+        "SQLite event storage for conversations, decisions, steps, approvals, external run references, and usage metadata.",
+        "Structured logs with secret redaction and inspect/export commands.",
+        "Fake executable fixtures for cdx-manager and Logics Manager contracts.",
+        "State transition, routing, timeout, resume, approval, and fallback tests."
+      ],
+      "scope_out": [
+        "Cloud telemetry, hosted dashboards, billing, or provider credential storage."
+      ],
+      "acceptance_criteria": [
+        "AC1: A process restart can reconstruct the latest valid conversation state from local events.",
+        "AC2: Logs and exports do not persist prompt secrets or provider credentials by default.",
+        "AC3: The default test suite is deterministic, offline, and covers success plus critical failure paths."
+      ]
+    }
+  ],
+  "orchestration_task": {
+    "title": "Orchestrate delivery of the Orchestrato MVP",
+    "plan": [
+      "Confirm the product and architecture decisions before implementation.",
+      "Deliver the CLI and persisted domain model as the first vertical foundation.",
+      "Implement deterministic role routing and policy validation.",
+      "Integrate cdx-manager through fake contract tests before using live sessions.",
+      "Integrate Logics planning and bounded context handoffs.",
+      "Implement supervision, review, recovery, approvals, and writer locking.",
+      "Run contract, state-machine, lint, audit, and end-to-end fake-runtime validation.",
+      "Record validation evidence and close the linked workflow only after every acceptance criterion is traced."
+    ]
+  },
+  "context_pack": {
+    "out": "logics/context-packs/orchestrato_mvp.json",
+    "mode": "summary-only",
+    "profile": "normal"
+  }
+}
