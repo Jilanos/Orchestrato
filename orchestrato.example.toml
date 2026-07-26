@@ -1,0 +1,48 @@
+[project]
+database = ".orchestrato/state.db"
+
+[policy]
+default_effort = "medium"
+max_attempts = 2
+
+[roles.planner]
+label = "Terra"
+provider = "codex"
+model = ""
+effort = "medium"
+permission = "review"
+
+[roles.executor]
+label = "Luna"
+provider = "codex"
+model = ""
+effort = "medium"
+permission = "workspace-write"
+
+[roles.recovery]
+label = "Sol"
+provider = "codex"
+model = ""
+effort = "high"
+permission = "workspace-write"
+
+[roles.specialist]
+label = "Specialist developer"
+provider = "claude"
+model = ""
+effort = "medium"
+permission = "workspace-write"
+
+[roles.reviewer]
+label = "Reviewer"
+provider = "claude"
+model = ""
+effort = "medium"
+permission = "read-only"
+
+[roles.operations]
+label = "Operations"
+provider = ""
+model = ""
+effort = "low"
+permission = "review"

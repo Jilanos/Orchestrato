@@ -1,13 +1,14 @@
 ## task_001_orchestrate_delivery_of_the_orchestrato_mvp - Orchestrate delivery of the Orchestrato MVP
 > From version: 1.0.0
 > Schema version: 1.0
-> Status: Ready
+> Status: In progress
 > Understanding: 90%
 > Confidence: 85%
-> Progress: 0%
+> Progress: 25%
 > Complexity: Medium
 > Theme: Implementation delivery
 > Reminder: Update status/understanding/confidence/progress and linked request/backlog references when you edit this doc.
+> Owner: codex
 
 # Context
 - Orchestrate the scaffolded request chain and keep sibling implementation slices linked.
@@ -60,9 +61,11 @@
 - Run `logics-manager flow validate` for the active request chain.
 - Run `logics-manager lint --require-status`.
 - Run `logics-manager audit --group-by-doc`.
+- Wave 1: 12 offline tests passed; CLI help, route, cdx fake contract, state persistence, and Logics adapter smoke checks passed.
 
 # Report
 - Not started. Record implementation waves and final evidence here.
+- Wave 1 delivered the dependency-light CLI, deterministic role routing, SQLite event store, cdx/Logics JSON adapters, and offline tests. Live cdx execution remains the next validation wave.
 
 # AI Context
 - Summary: Orchestrate delivery of the Orchestrato MVP

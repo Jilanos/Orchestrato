@@ -177,7 +177,7 @@
       "path": "logics/backlog/item_001_build_the_repository_scoped_conversational_cli.md",
       "ref": "item_001_build_the_repository_scoped_conversational_cli",
       "schema_version": "1.0",
-      "status": "Ready",
+      "status": "In progress",
       "title": "Build the repository-scoped conversational CLI"
     },
     {
@@ -205,7 +205,7 @@
       "path": "logics/backlog/item_002_define_agent_profiles_and_deterministic_routing_policy.md",
       "ref": "item_002_define_agent_profiles_and_deterministic_routing_policy",
       "schema_version": "1.0",
-      "status": "Ready",
+      "status": "In progress",
       "title": "Define agent profiles and deterministic routing policy"
     },
     {
@@ -233,7 +233,7 @@
       "path": "logics/backlog/item_003_integrate_the_cdx_manager_headless_execution_contract.md",
       "ref": "item_003_integrate_the_cdx_manager_headless_execution_contract",
       "schema_version": "1.0",
-      "status": "Ready",
+      "status": "In progress",
       "title": "Integrate the cdx-manager headless execution contract"
     },
     {
@@ -261,7 +261,7 @@
       "path": "logics/backlog/item_004_integrate_logics_planning_and_bounded_handoffs.md",
       "ref": "item_004_integrate_logics_planning_and_bounded_handoffs",
       "schema_version": "1.0",
-      "status": "Ready",
+      "status": "In progress",
       "title": "Integrate Logics planning and bounded handoffs"
     },
     {
@@ -289,7 +289,7 @@
       "path": "logics/backlog/item_005_implement_finite_supervision_review_and_recovery.md",
       "ref": "item_005_implement_finite_supervision_review_and_recovery",
       "schema_version": "1.0",
-      "status": "Ready",
+      "status": "In progress",
       "title": "Implement finite supervision, review, and recovery"
     },
     {
@@ -317,7 +317,7 @@
       "path": "logics/backlog/item_006_add_local_persistence_observability_and_contract_tests.md",
       "ref": "item_006_add_local_persistence_observability_and_contract_tests",
       "schema_version": "1.0",
-      "status": "Ready",
+      "status": "In progress",
       "title": "Add local persistence, observability, and contract tests"
     },
     {
@@ -389,7 +389,7 @@
       "path": "logics/tasks/task_001_orchestrate_delivery_of_the_orchestrato_mvp.md",
       "ref": "task_001_orchestrate_delivery_of_the_orchestrato_mvp",
       "schema_version": "1.0",
-      "status": "Ready",
+      "status": "In progress",
       "title": "Orchestrate delivery of the Orchestrato MVP"
     },
     {
@@ -482,11 +482,11 @@
     }
   ],
   "estimates": {
-    "char_count": 14762,
+    "char_count": 14804,
     "companion_doc_count": 4,
     "doc_count": 12
   },
-  "generated_at": "2026-07-26T21:15:23Z",
+  "generated_at": "2026-07-26T21:26:30Z",
   "handoff": {
     "companion_doc_count": 4,
     "enabled": true,
@@ -575,7 +575,8 @@
         "- Run the offline fake-runtime end-to-end scenario.",
         "- Run `logics-manager flow validate` for the active request chain.",
         "- Run `logics-manager lint --require-status`.",
-        "- Run `logics-manager audit --group-by-doc`."
+        "- Run `logics-manager audit --group-by-doc`.",
+        "- Wave 1: 12 offline tests passed; CLI help, route, cdx fake contract, state persistence, and Logics adapter smoke checks passed."
       ],
       "path": "logics/tasks/task_001_orchestrate_delivery_of_the_orchestrato_mvp.md",
       "ref": "task_001_orchestrate_delivery_of_the_orchestrato_mvp"

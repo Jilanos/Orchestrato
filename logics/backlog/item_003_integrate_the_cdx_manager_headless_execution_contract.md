@@ -1,10 +1,10 @@
 ## item_003_integrate_the_cdx_manager_headless_execution_contract - Integrate the cdx-manager headless execution contract
 > From version: 1.0.0
 > Schema version: 1.0
-> Status: Ready
+> Status: In progress
 > Understanding: 90%
 > Confidence: 85%
-> Progress: 0%
+> Progress: 25%
 > Complexity: Medium
 > Theme: Runtime integration
 > Reminder: Update status/understanding/confidence/progress and linked request/task references when you edit this doc.

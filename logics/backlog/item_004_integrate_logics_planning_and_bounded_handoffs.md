@@ -1,10 +1,10 @@
 ## item_004_integrate_logics_planning_and_bounded_handoffs - Integrate Logics planning and bounded handoffs
 > From version: 1.0.0
 > Schema version: 1.0
-> Status: Ready
+> Status: In progress
 > Understanding: 90%
 > Confidence: 85%
-> Progress: 0%
+> Progress: 25%
 > Complexity: High
 > Theme: Workflow integration
 > Reminder: Update status/understanding/confidence/progress and linked request/task references when you edit this doc.

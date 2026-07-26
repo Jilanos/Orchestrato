@@ -84,4 +84,20 @@ logics/context-packs/ Bounded agent handoffs
 logics/scaffold/      Reproducible request-chain inputs
 ```
 
-The implementation will be added only after the product and architecture decisions have been reviewed.
+The first implementation slice follows these product and architecture decisions; later waves remain governed by the linked Logics task.
+
+## Local development
+
+The first vertical slice is now available as a dependency-light Python CLI:
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e '.[dev]'
+orchestrato --root . --json route "Design the orchestration architecture"
+orchestrato --root . --json plan "Implement the first CLI vertical slice"
+orchestrato --root . status
+python -m pytest
+```
+
+The CLI persists local state under `.orchestrato/state.db`, which is ignored by Git. It currently exposes planning, deterministic routing, approval-aware run state, inspection, and offline cdx/Logics adapter contracts. Live provider execution is the next implementation wave.

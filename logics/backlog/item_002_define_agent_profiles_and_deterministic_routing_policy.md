@@ -1,10 +1,10 @@
 ## item_002_define_agent_profiles_and_deterministic_routing_policy - Define agent profiles and deterministic routing policy
 > From version: 1.0.0
 > Schema version: 1.0
-> Status: Ready
+> Status: In progress
 > Understanding: 90%
 > Confidence: 85%
-> Progress: 0%
+> Progress: 25%
 > Complexity: High
 > Theme: Routing policy
 > Reminder: Update status/understanding/confidence/progress and linked request/task references when you edit this doc.
