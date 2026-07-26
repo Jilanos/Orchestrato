@@ -64,6 +64,7 @@
 - Wave 1: 12 offline tests passed; CLI help, route, cdx fake contract, state persistence, and Logics adapter smoke checks passed.
 - Wave 2: 14 offline tests passed; bounded retry, exclusive worktree lease, compact REPL, cdx run-status/report, and Logics context-pack adapter surfaces are covered.
 - Wave 3: 15 offline tests passed; explicit approve and cancel commands complete the operator approval flow.
+- Live read-only cdx smoke: cdx select --provider codex --min-reasoning-effort medium --json returned an authenticated suitable session with medium effort.
 
 # Report
 - Not started. Record implementation waves and final evidence here.
