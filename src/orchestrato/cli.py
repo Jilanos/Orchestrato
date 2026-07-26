@@ -38,6 +38,11 @@ def build_parser() -> argparse.ArgumentParser:
     inspect = sub.add_parser("inspect", help="Inspect one objective and its events")
     inspect.add_argument("objective_id")
 
+    approve = sub.add_parser("approve", help="Approve a planned objective")
+    approve.add_argument("objective_id")
+    cancel = sub.add_parser("cancel", help="Cancel a non-terminal objective")
+    cancel.add_argument("objective_id")
+
     sub.add_parser("logics-status", help="Read Logics Manager status as JSON")
     validate = sub.add_parser("validate", help="Validate Logics refs")
     validate.add_argument("refs", nargs="+", help="Logics refs to validate")
@@ -74,6 +79,12 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "inspect":
             objective = store.get(args.objective_id)
             return emit({"objective": orchestrator.render_plan(objective), "events": store.events(args.objective_id)}, args.json)
+        if args.command == "approve":
+            started = orchestrator.approve_and_start(args.objective_id)
+            return emit({"ok": True, **orchestrator.render_plan(started)}, args.json)
+        if args.command == "cancel":
+            cancelled = orchestrator.cancel(args.objective_id)
+            return emit({"ok": True, **orchestrator.render_plan(cancelled)}, args.json)
         if args.command in {"logics-status", "validate"}:
             from .adapters.logics import LogicsAdapter
             adapter = LogicsAdapter()

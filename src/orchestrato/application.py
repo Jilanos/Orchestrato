@@ -35,6 +35,9 @@ class Orchestrator:
             self.store.transition(objective_id, "executing")
         return self.store.get(objective_id)
 
+    def cancel(self, objective_id: str) -> Objective:
+        return self.store.transition(objective_id, "cancelled", {"actor": "operator"})
+
     def complete(self, objective_id: str, result: dict[str, Any] | None = None) -> Objective:
         objective = self.store.get(objective_id)
         if objective.state == "executing":
