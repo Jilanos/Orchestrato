@@ -70,7 +70,6 @@ class Orchestrator:
             result = adapter.run(objective.route, prompt_file, cwd=root)
         except Exception as exc:
             self.store.transition(objective_id, "recovering", {"error": str(exc), "prompt_file": str(prompt_file)})
-            self.store.transition(objective_id, "blocked", {"reason": "cdx execution failed"})
             raise RuntimeError(f"cdx execution failed: {exc}") from exc
         result = {"selection": selection, "run": result, "prompt_file": str(prompt_file)}
         return self.complete(objective_id, result)

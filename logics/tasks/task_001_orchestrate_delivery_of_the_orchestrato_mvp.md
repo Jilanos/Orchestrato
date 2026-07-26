@@ -4,7 +4,7 @@
 > Status: In progress
 > Understanding: 90%
 > Confidence: 85%
-> Progress: 25%
+> Progress: 40%
 > Complexity: Medium
 > Theme: Implementation delivery
 > Reminder: Update status/understanding/confidence/progress and linked request/backlog references when you edit this doc.
@@ -62,6 +62,7 @@
 - Run `logics-manager lint --require-status`.
 - Run `logics-manager audit --group-by-doc`.
 - Wave 1: 12 offline tests passed; CLI help, route, cdx fake contract, state persistence, and Logics adapter smoke checks passed.
+- Wave 2: 14 offline tests passed; bounded retry, exclusive worktree lease, compact REPL, cdx run-status/report, and Logics context-pack adapter surfaces are covered.
 
 # Report
 - Not started. Record implementation waves and final evidence here.

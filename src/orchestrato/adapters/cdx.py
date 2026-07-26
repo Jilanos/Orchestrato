@@ -35,3 +35,15 @@ class CdxAdapter:
         if result.returncode != 0:
             raise RuntimeError(result.stderr.strip() or "cdx run failed")
         return result.json()
+
+    def run_status(self, run_id: str, *, cwd: Path) -> dict[str, Any]:
+        result = self.runner.run([self.executable, "run-status", run_id, "--json"], cwd=cwd)
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or "cdx run-status failed")
+        return result.json()
+
+    def run_report(self, run_id: str, *, cwd: Path) -> dict[str, Any]:
+        result = self.runner.run([self.executable, "run-report", run_id, "--json"], cwd=cwd)
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or "cdx run-report failed")
+        return result.json()

@@ -8,6 +8,7 @@ from . import __version__
 from .application import Orchestrator, database_for
 from .policy import PolicyRouter, load_config
 from .store import EventStore
+from .supervisor import Supervisor
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -40,6 +41,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("logics-status", help="Read Logics Manager status as JSON")
     validate = sub.add_parser("validate", help="Validate Logics refs")
     validate.add_argument("refs", nargs="+", help="Logics refs to validate")
+    sub.add_parser("repl", help="Start the compact interactive operator loop")
     return parser
 
 
@@ -51,6 +53,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         router = PolicyRouter(config)
         orchestrator = Orchestrator(store, router)
+        supervisor = Supervisor(orchestrator, int(config.get("policy", {}).get("max_attempts", 2)))
         if args.command == "route":
             route = router.route(args.objective, role=args.role, effort=args.effort)
             return emit(route.to_dict(), args.json)
@@ -63,7 +66,7 @@ def main(argv: list[str] | None = None) -> int:
                 return emit({"ok": False, "error": "approval_required", **orchestrator.render_plan(objective)}, args.json, 2)
             started = orchestrator.approve_and_start(objective.objective_id)
             if args.execute:
-                completed = orchestrator.execute(objective.objective_id, root=root)
+                completed = supervisor.execute(objective.objective_id, root=root)
                 return emit({"ok": True, **orchestrator.render_plan(completed)}, args.json)
             return emit({"ok": True, **orchestrator.render_plan(started), "next": "execute via cdx adapter"}, args.json)
         if args.command == "status":
@@ -76,11 +79,40 @@ def main(argv: list[str] | None = None) -> int:
             adapter = LogicsAdapter()
             payload = adapter.status(cwd=root) if args.command == "logics-status" else adapter.validate(args.refs, cwd=root)
             return emit(payload, args.json)
+        if args.command == "repl":
+            return repl(orchestrator)
     except (KeyError, ValueError, RuntimeError) as exc:
         return emit({"ok": False, "error": str(exc)}, args.json, 1)
     finally:
         store.close()
     return 0
+
+
+def repl(orchestrator: Orchestrator) -> int:
+    print("Orchestrato REPL. Enter an objective, or /status, /quit.")
+    while True:
+        try:
+            line = input("orch> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return 0
+        if not line:
+            continue
+        if line in {"/quit", "/exit"}:
+            return 0
+        if line == "/status":
+            for item in orchestrator.store.list():
+                print(f"{item.objective_id} [{item.state}] {item.text}")
+            continue
+        if line.startswith("/route "):
+            route = orchestrator.router.route(line[7:])
+            print(f"{route.profile.label} / {route.effort}: {route.reason}")
+            continue
+        try:
+            objective = orchestrator.plan(line)
+            print(f"{objective.objective_id}: planned -> {objective.route.profile.label if objective.route else 'unknown'}")
+        except ValueError as exc:
+            print(f"error: {exc}")
 
 
 def emit(payload: dict, machine: bool, exit_code: int = 0) -> int:

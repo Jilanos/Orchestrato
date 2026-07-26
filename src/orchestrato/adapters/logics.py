@@ -22,3 +22,9 @@ class LogicsAdapter:
         if result.returncode != 0:
             raise RuntimeError(result.stderr.strip() or "logics-manager validation failed")
         return result.json()
+
+    def context_pack(self, refs: list[str], *, cwd: Path) -> dict[str, Any]:
+        result = self.runner.run([self.executable, "sync", "context-pack", *refs, "--format", "json"], cwd=cwd)
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or "logics-manager context-pack failed")
+        return result.json()

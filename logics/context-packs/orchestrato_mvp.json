@@ -486,7 +486,7 @@
     "companion_doc_count": 4,
     "doc_count": 12
   },
-  "generated_at": "2026-07-26T21:26:30Z",
+  "generated_at": "2026-07-26T21:29:21Z",
   "handoff": {
     "companion_doc_count": 4,
     "enabled": true,
@@ -576,7 +576,8 @@
         "- Run `logics-manager flow validate` for the active request chain.",
         "- Run `logics-manager lint --require-status`.",
         "- Run `logics-manager audit --group-by-doc`.",
-        "- Wave 1: 12 offline tests passed; CLI help, route, cdx fake contract, state persistence, and Logics adapter smoke checks passed."
+        "- Wave 1: 12 offline tests passed; CLI help, route, cdx fake contract, state persistence, and Logics adapter smoke checks passed.",
+        "- Wave 2: 14 offline tests passed; bounded retry, exclusive worktree lease, compact REPL, cdx run-status/report, and Logics context-pack adapter surfaces are covered."
       ],
       "path": "logics/tasks/task_001_orchestrate_delivery_of_the_orchestrato_mvp.md",
       "ref": "task_001_orchestrate_delivery_of_the_orchestrato_mvp"

@@ -97,7 +97,8 @@ python -m pip install -e '.[dev]'
 orchestrato --root . --json route "Design the orchestration architecture"
 orchestrato --root . --json plan "Implement the first CLI vertical slice"
 orchestrato --root . status
+orchestrato --root . repl
 python -m pytest
 ```
 
-The CLI persists local state under `.orchestrato/state.db`, which is ignored by Git. It currently exposes planning, deterministic routing, approval-aware run state, inspection, and offline cdx/Logics adapter contracts. Live provider execution is the next implementation wave.
+The CLI persists local state under `.orchestrato/state.db`, which is ignored by Git. It currently exposes planning, deterministic routing, approval-aware run state, inspection, a compact REPL, bounded retries, a worktree writer lock, and offline cdx/Logics adapter contracts. Live provider execution is opt-in with `run --execute`.
