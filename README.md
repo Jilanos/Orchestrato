@@ -39,7 +39,7 @@ flowchart LR
 
 Orchestrato owns orchestration policy and state. cdx-manager owns provider sessions and agent execution. Logics Manager owns product, architecture, backlog, task, validation, and bounded context workflows.
 
-Read the detailed [product brief](docs/product.md), [architecture](docs/architecture.md), and [MVP request chain](logics/INDEX.md).
+Read the detailed [product brief](docs/product.md), [architecture](docs/architecture.md), [agent orchestration benchmark](docs/agent-orchestration-benchmark-2026-07-27.md), and [MVP request chain](logics/INDEX.md).
 
 ## Workflow
 

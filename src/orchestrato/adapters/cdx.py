@@ -7,6 +7,15 @@ from typing import Any, Callable
 
 from .subprocess import CommandRunner
 from ..models import RouteDecision
+from ..observability import bounded_payload
+
+
+class CdxRunError(RuntimeError):
+    """A safe, structured diagnostic returned by a failed cdx run."""
+
+    def __init__(self, diagnostic: dict[str, Any]) -> None:
+        self.diagnostic = diagnostic
+        super().__init__(diagnostic["message"])
 
 
 class CdxAdapter:
@@ -66,7 +75,14 @@ class CdxAdapter:
             raise error_box[0]
         result = result_box[0]
         if result.returncode != 0:
-            raise RuntimeError(result.stderr.strip() or "cdx run failed")
+            diagnostic = bounded_payload({
+                "exit_code": result.returncode,
+                "message": result.stderr.strip() or result.stdout.strip() or (
+                    f"cdx run exited with code {result.returncode} and produced no diagnostic output"
+                ),
+            })
+            self._emit("cdx_run_failed", diagnostic)
+            raise CdxRunError(diagnostic)
         payload = result.json()
         self._emit("cdx_run_completed", payload)
         return payload

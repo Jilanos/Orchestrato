@@ -10,6 +10,14 @@ from .policy import PolicyRouter
 from .store import EventStore
 
 
+class ExecutionError(RuntimeError):
+    """A failed execution with a safe diagnostic for CLI and recovery flows."""
+
+    def __init__(self, message: str, diagnostic: dict[str, Any]) -> None:
+        self.diagnostic = diagnostic
+        super().__init__(message)
+
+
 class Orchestrator:
     def __init__(self, store: EventStore, router: PolicyRouter) -> None:
         self.store = store
@@ -81,9 +89,10 @@ class Orchestrator:
             selection = adapter.select(objective.route, cwd=root)
             result = adapter.run(objective.route, prompt_file, cwd=root)
         except Exception as exc:
-            self.publish(objective_id, "run_failed", {"error": str(exc)}, observer)
-            self.store.transition(objective_id, "recovering", {"error": str(exc), "prompt_file": str(prompt_file)})
-            raise RuntimeError(f"cdx execution failed: {exc}") from exc
+            diagnostic = getattr(exc, "diagnostic", {"message": str(exc)})
+            self.publish(objective_id, "run_failed", diagnostic, observer)
+            self.store.transition(objective_id, "recovering", {"diagnostic": diagnostic, "prompt_file": str(prompt_file)})
+            raise ExecutionError(f"cdx execution failed: {diagnostic.get('message', str(exc))}", diagnostic) from exc
         result = {"selection": selection, "run": result, "prompt_file": str(prompt_file)}
         self.publish(objective_id, "run_completed", {"state": "completed", "run": result.get("run", {})}, observer)
         return self.complete(objective_id, result)

@@ -112,7 +112,11 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "repl":
             return repl(orchestrator)
     except (KeyError, ValueError, RuntimeError) as exc:
-        return emit({"ok": False, "error": str(exc)}, args.json, 1)
+        payload = {"ok": False, "error": str(exc)}
+        diagnostic = getattr(exc, "diagnostic", None)
+        if diagnostic is not None:
+            payload["diagnostic"] = diagnostic
+        return emit(payload, args.json, 1)
     finally:
         store.close()
     return 0

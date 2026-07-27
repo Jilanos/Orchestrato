@@ -1,0 +1,102 @@
+{
+  "title": "Expose actionable cdx execution failure diagnostics",
+  "references": [
+    "src/orchestrato/adapters/cdx.py",
+    "src/orchestrato/cli.py",
+    "tests/test_adapters.py",
+    "tests/test_cli.py"
+  ],
+  "request": {
+    "complexity": "Medium",
+    "theme": "Runtime reliability",
+    "needs": [
+      "An operator needs the actual cdx execution failure to diagnose a rejected live run without rerunning the command manually."
+    ],
+    "context": [
+      "CdxAdapter currently raises a generic cdx run failed error when subprocess stderr is empty or unavailable to the outer reporter.",
+      "The failure must remain safe for JSON output and must not expose credentials or prompt secrets."
+    ],
+    "acceptance_criteria": [
+      "AC1: A non-zero cdx run result produces a structured, actionable diagnostic containing the exit code and bounded safe stderr or stdout context when available.",
+      "AC2: Orchestrato persists the safe diagnostic in its event history and returns it through the JSON CLI failure response.",
+      "AC3: Credential-like values and prompt content are redacted from diagnostics before persistence or display.",
+      "AC4: Offline contract tests cover a cdx run failure with diagnostic output and a failure without diagnostic output."
+    ]
+  },
+  "product": {
+    "title": "Actionable cdx failure reporting",
+    "overview": "Turn opaque cdx execution failures into safe diagnostics that an operator can act on.",
+    "goals": [
+      "Surface the cause of a failed cdx run in the CLI and inspect history.",
+      "Preserve JSON protocol compatibility and secret redaction.",
+      "Keep default verification fully offline."
+    ],
+    "non_goals": [
+      "Changing cdx authentication, provider quotas, or session management.",
+      "Parsing interactive provider terminal output.",
+      "Adding cloud telemetry or external error reporting."
+    ]
+  },
+  "backlog_items": [
+    {
+      "title": "Propagate structured cdx run failure diagnostics",
+      "priority": "High",
+      "complexity": "Medium",
+      "theme": "Runtime integration",
+      "request_acs": ["AC1", "AC3"],
+      "problem": [
+        "The adapter discards the specific subprocess failure reason, leaving operators with only cdx run failed."
+      ],
+      "scope_in": [
+        "Capture exit code and bounded stderr or stdout failure context from cdx run.",
+        "Represent the failure with a typed diagnostic that can be handled by the supervisor.",
+        "Apply existing redaction rules before emitting the diagnostic."
+      ],
+      "scope_out": [
+        "Provider-specific SDK calls or authentication changes."
+      ],
+      "acceptance_criteria": [
+        "AC1: A failing cdx run preserves its exit code and a safe, bounded diagnostic message.",
+        "AC2: Empty subprocess output still results in a stable actionable fallback diagnostic.",
+        "AC3: Diagnostic text is redacted before it can leave the adapter boundary."
+      ]
+    },
+    {
+      "title": "Persist and test cdx failure diagnostics",
+      "priority": "High",
+      "complexity": "Medium",
+      "theme": "Observability",
+      "request_acs": ["AC2", "AC3", "AC4"],
+      "problem": [
+        "The CLI and stored objective history do not currently give the operator enough evidence to resolve a failed live execution."
+      ],
+      "scope_in": [
+        "Publish and persist safe cdx failure diagnostics as execution events.",
+        "Return the diagnostic from JSON failure output without corrupting stdout protocol behavior.",
+        "Add deterministic fake-cdx tests for populated and empty failure output plus redaction."
+      ],
+      "scope_out": [
+        "Live provider-account tests or external telemetry."
+      ],
+      "acceptance_criteria": [
+        "AC1: Inspect output reconstructs the safe cdx failure diagnostic after process exit.",
+        "AC2: JSON error output exposes a concise safe diagnostic.",
+        "AC3: Offline tests verify populated output, empty output, and secret redaction."
+      ]
+    }
+  ],
+  "orchestration_task": {
+    "title": "Deliver actionable cdx execution diagnostics",
+    "plan": [
+      "Define the typed failure diagnostic and redaction boundary in the cdx adapter.",
+      "Propagate the diagnostic through supervision, events, persistence, and JSON CLI reporting.",
+      "Add fake-runtime contract tests for populated, empty, and redacted diagnostics.",
+      "Run pytest plus Logics lint and audit, then record validation evidence."
+    ]
+  },
+  "context_pack": {
+    "out": "logics/context-packs/cdx_failure_diagnostics.json",
+    "mode": "summary-only",
+    "profile": "normal"
+  }
+}

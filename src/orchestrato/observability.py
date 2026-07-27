@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from typing import Any, TextIO
@@ -9,6 +10,10 @@ from typing import Any, TextIO
 SENSITIVE_KEYS = ("token", "secret", "password", "authorization", "credential", "env")
 MAX_STRING_LENGTH = 2000
 MAX_PAYLOAD_LENGTH = 12000
+
+_SENSITIVE_TEXT = re.compile(
+    r"(?i)(\b(?:api[_-]?key|access[_-]?token|refresh[_-]?token|password|secret|authorization|credential)\b\s*[:=]\s*)([^\s,;]+)"
+)
 
 
 def bounded_payload(payload: dict[str, Any]) -> dict[str, Any]:
@@ -27,8 +32,10 @@ def _redact(value: Any, key: str = "") -> Any:
         return {str(item_key): _redact(item_value, str(item_key)) for item_key, item_value in value.items()}
     if isinstance(value, (list, tuple)):
         return [_redact(item, key) for item in value]
-    if isinstance(value, str) and len(value) > MAX_STRING_LENGTH:
-        return value[:MAX_STRING_LENGTH] + "..."
+    if isinstance(value, str):
+        value = _SENSITIVE_TEXT.sub(r"\1[redacted]", value)
+        if len(value) > MAX_STRING_LENGTH:
+            return value[:MAX_STRING_LENGTH] + "..."
     return value
 
 
@@ -93,6 +100,8 @@ class LiveReporter:
             return f"status={payload.get('status', 'unknown')} run_id={payload.get('run_id', 'unknown')}"
         if kind == "cdx_run_completed":
             return f"run_id={payload.get('run_id', 'unknown')} exit_code={payload.get('exit_code', '?')} duration={payload.get('duration_seconds', '?')}s"
+        if kind == "cdx_run_failed":
+            return f"exit_code={payload.get('exit_code', '?')} message={payload.get('message', 'unknown error')}"
         if kind == "retry_scheduled":
             return f"attempt={payload.get('attempt')} reason={payload.get('reason', 'unknown')}"
         if kind == "run_failed":

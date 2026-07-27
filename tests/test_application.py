@@ -77,6 +77,35 @@ def test_supervisor_retries_once_then_blocks(tmp_path: Path) -> None:
     store.close()
 
 
+def test_execute_persists_cdx_failure_diagnostic(tmp_path: Path) -> None:
+    store = EventStore(tmp_path / "state.db")
+    app = Orchestrator(store, PolicyRouter())
+    planned = app.plan("Implement the feature")
+    app.approve_and_start(planned.objective_id)
+
+    class FailingRunner:
+        def run(self, command, *, cwd, timeout=300):
+            if command[1] == "select":
+                return CommandResult(tuple(command), 0, '{"ok": true}', "")
+            return CommandResult(tuple(command), 1, "", "provider rejected password=hidden-value")
+
+    try:
+        app.execute(planned.objective_id, root=tmp_path, cdx=CdxAdapter(runner=FailingRunner()))
+    except RuntimeError as exc:
+        assert "provider rejected password=[redacted]" in str(exc)
+        assert "hidden-value" not in str(exc)
+        assert getattr(exc, "diagnostic")["exit_code"] == 1
+    else:
+        raise AssertionError("expected execution failure")
+
+    failed = [event for event in store.events(planned.objective_id) if event["kind"] == "run_failed"]
+    assert len(failed) == 1
+    assert "password=[redacted]" in failed[0]["payload_json"]
+    assert "hidden-value" not in failed[0]["payload_json"]
+    assert store.get(planned.objective_id).state == "recovering"
+    store.close()
+
+
 def test_worktree_lease_is_exclusive(tmp_path: Path) -> None:
     first = WorktreeLease(tmp_path)
     first.__enter__()
