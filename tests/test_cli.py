@@ -27,3 +27,11 @@ def test_cli_can_approve_a_planned_objective(tmp_path: Path, capsys) -> None:
     assert main(["--root", str(tmp_path), "--json", "approve", objective_id]) == 0
     approved = json.loads(capsys.readouterr().out)
     assert approved["state"] == "executing"
+
+
+def test_cli_live_flag_is_available_without_corrupting_json(tmp_path: Path, capsys) -> None:
+    assert main(["--root", str(tmp_path), "--json", "run", "Implement the feature", "--live"]) == 2
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    assert payload["error"] == "approval_required"
+    assert "route_selected" in captured.err

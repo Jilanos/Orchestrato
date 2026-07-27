@@ -38,12 +38,12 @@ class Supervisor:
         self.app = app
         self.max_attempts = max(1, max_attempts)
 
-    def execute(self, objective_id: str, *, root: Path, cdx: CdxAdapter | None = None):
+    def execute(self, objective_id: str, *, root: Path, cdx: CdxAdapter | None = None, observer=None):
         last_error: RuntimeError | None = None
         for attempt in range(1, self.max_attempts + 1):
             try:
                 with WorktreeLease(root):
-                    return self.app.execute(objective_id, root=root, cdx=cdx)
+                    return self.app.execute(objective_id, root=root, cdx=cdx, observer=observer)
             except RuntimeError as exc:
                 last_error = exc
                 objective = self.app.store.get(objective_id)
@@ -51,5 +51,6 @@ class Supervisor:
                     if objective.state == "recovering":
                         self.app.store.transition(objective_id, "blocked", {"attempt": attempt, "error": str(exc)})
                     break
+                self.app.publish(objective_id, "retry_scheduled", {"attempt": attempt + 1, "reason": str(exc)}, observer)
                 self.app.store.transition(objective_id, "executing", {"attempt": attempt + 1, "recovery": "bounded_retry"})
         raise last_error or RuntimeError("execution failed")

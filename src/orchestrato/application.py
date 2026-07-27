@@ -47,7 +47,7 @@ class Orchestrator:
             self.store.transition(objective_id, "completed", result or {})
         return self.store.get(objective_id)
 
-    def execute(self, objective_id: str, *, root: Path, cdx: CdxAdapter | None = None) -> Objective:
+    def execute(self, objective_id: str, *, root: Path, cdx: CdxAdapter | None = None, observer=None) -> Objective:
         objective = self.store.get(objective_id)
         if objective.state != "executing" or objective.route is None:
             raise ValueError(f"Objective is not executable: {objective.state}")
@@ -67,15 +67,37 @@ class Orchestrator:
             + "\n",
             encoding="utf-8",
         )
-        adapter = cdx or CdxAdapter()
+        self.publish(objective_id, "run_started", {
+            "role": objective.route.profile.role,
+            "provider": objective.route.profile.provider or "automatic",
+            "model": objective.route.profile.model,
+            "effort": objective.route.effort,
+            "permission": objective.route.profile.permission,
+            "cwd": str(root),
+        }, observer)
+        self.publish(objective_id, "handoff_written", {"prompt_file": str(prompt_file)}, observer)
+        adapter = cdx or CdxAdapter(on_event=lambda kind, payload: self.publish(objective_id, kind, payload, observer))
         try:
             selection = adapter.select(objective.route, cwd=root)
             result = adapter.run(objective.route, prompt_file, cwd=root)
         except Exception as exc:
+            self.publish(objective_id, "run_failed", {"error": str(exc)}, observer)
             self.store.transition(objective_id, "recovering", {"error": str(exc), "prompt_file": str(prompt_file)})
             raise RuntimeError(f"cdx execution failed: {exc}") from exc
         result = {"selection": selection, "run": result, "prompt_file": str(prompt_file)}
+        self.publish(objective_id, "run_completed", {"state": "completed", "run": result.get("run", {})}, observer)
         return self.complete(objective_id, result)
+
+    def publish(self, objective_id: str, kind: str, payload: dict[str, Any], observer=None) -> None:
+        event = self.store.record_event(objective_id, kind, payload)
+        if observer:
+            observer({
+                "id": event["id"],
+                "objective_id": objective_id,
+                "kind": kind,
+                "payload": payload,
+                "created_at": event["created_at"],
+            })
 
     def render_plan(self, objective: Objective) -> dict[str, Any]:
         return {

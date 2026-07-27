@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .models import Objective, RouteDecision
+from .observability import bounded_payload
 
 
 TRANSITIONS = {
@@ -105,10 +106,17 @@ class EventStore:
         rows = self._db.execute("SELECT * FROM events WHERE objective_id = ? ORDER BY id", (objective_id,)).fetchall()
         return [dict(row) for row in rows]
 
+    def record_event(self, objective_id: str, kind: str, payload: dict[str, Any]) -> dict[str, Any]:
+        """Persist an evidence event and return the ordered event record."""
+        self._event(objective_id, kind, None, None, bounded_payload(payload))
+        self._db.commit()
+        row = self._db.execute("SELECT * FROM events WHERE id = last_insert_rowid()").fetchone()
+        return dict(row)
+
     def _event(self, objective_id: str, kind: str, from_state: str | None, to_state: str | None, payload: dict[str, Any]) -> None:
         self._db.execute(
             "INSERT INTO events(objective_id, kind, from_state, to_state, payload_json, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-            (objective_id, kind, from_state, to_state, json.dumps(payload), now()),
+            (objective_id, kind, from_state, to_state, json.dumps(bounded_payload(payload)), now()),
         )
 
 

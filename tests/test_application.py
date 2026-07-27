@@ -25,6 +25,29 @@ def test_execute_persists_handoff_and_completes(tmp_path: Path) -> None:
     store.close()
 
 
+def test_execute_publishes_live_events_and_redacts_payload(tmp_path: Path) -> None:
+    store = EventStore(tmp_path / "state.db")
+    app = Orchestrator(store, PolicyRouter())
+    planned = app.plan("Implement the first feature")
+    app.approve_and_start(planned.objective_id)
+    observed: list[dict] = []
+
+    completed = app.execute(
+        planned.objective_id,
+        root=tmp_path,
+        cdx=CdxAdapter(runner=FakeRunner({"ok": True, "action": "run"})),
+        observer=observed.append,
+    )
+
+    assert completed.state == "completed"
+    assert [event["kind"] for event in observed] == ["run_started", "handoff_written", "run_completed"]
+    persisted = store.events(planned.objective_id)
+    assert any(event["kind"] == "run_started" for event in persisted)
+    store.record_event(planned.objective_id, "provider_evidence", {"access_token": "do-not-store"})
+    assert "[redacted]" in store.events(planned.objective_id)[-1]["payload_json"]
+    store.close()
+
+
 def test_supervisor_retries_once_then_blocks(tmp_path: Path) -> None:
     store = EventStore(tmp_path / "state.db")
     app = Orchestrator(store, PolicyRouter())

@@ -31,3 +31,15 @@ def test_cdx_selection_precedes_execution(tmp_path: Path) -> None:
     adapter.run(route, tmp_path / "prompt.txt", cwd=tmp_path)
     assert runner.commands[0][:3] == ["cdx", "select", "--json"]
     assert runner.commands[1][0:2] == ["cdx", "run"]
+
+
+def test_cdx_adapter_reports_selection_and_run_events(tmp_path: Path) -> None:
+    runner = FakeRunner({"ok": True, "action": "run", "run_id": "run-1"})
+    observed: list[tuple[str, dict]] = []
+    adapter = CdxAdapter(runner=runner, on_event=lambda kind, payload: observed.append((kind, payload)))
+    route = PolicyRouter().route("Implement a feature")
+    adapter.select(route, cwd=tmp_path)
+    adapter.run(route, tmp_path / "prompt.txt", cwd=tmp_path)
+    assert [kind for kind, _ in observed] == [
+        "cdx_selection_started", "cdx_selection_completed", "cdx_run_started", "cdx_run_completed",
+    ]

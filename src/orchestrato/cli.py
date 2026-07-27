@@ -7,6 +7,7 @@ from pathlib import Path
 from . import __version__
 from .application import Orchestrator, database_for
 from .policy import PolicyRouter, load_config
+from .observability import LiveReporter
 from .store import EventStore
 from .supervisor import Supervisor
 
@@ -29,6 +30,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("objective")
     run.add_argument("--yes", action="store_true", help="Approve the route when it mutates the repository")
     run.add_argument("--execute", action="store_true", help="Invoke cdx-manager after approval")
+    run.add_argument("--live", action="store_true", help="Print execution events as they occur to stderr")
     run.add_argument("--role")
     run.add_argument("--effort", choices=("low", "medium", "high"))
 
@@ -66,13 +68,30 @@ def main(argv: list[str] | None = None) -> int:
             objective = orchestrator.plan(args.objective, role=args.role, effort=args.effort)
             return emit(orchestrator.render_plan(objective), args.json)
         if args.command == "run":
+            reporter = LiveReporter() if args.live else None
+            if reporter:
+                reporter.start()
             objective = orchestrator.plan(args.objective, role=args.role, effort=args.effort)
+            route_payload = {
+                "role": objective.route.profile.role if objective.route else "unknown",
+                "provider": objective.route.profile.provider if objective.route else "unknown",
+                "effort": objective.route.effort if objective.route else "unknown",
+                "permission": objective.route.profile.permission if objective.route else "unknown",
+            }
+            orchestrator.publish(objective.objective_id, "route_selected", route_payload, reporter)
             if objective.route and objective.route.approval_required and not args.yes:
+                if reporter:
+                    reporter.close()
                 return emit({"ok": False, "error": "approval_required", **orchestrator.render_plan(objective)}, args.json, 2)
             started = orchestrator.approve_and_start(objective.objective_id)
+            orchestrator.publish(objective.objective_id, "approval_granted", {"state": started.state}, reporter)
             if args.execute:
-                completed = supervisor.execute(objective.objective_id, root=root)
+                completed = supervisor.execute(objective.objective_id, root=root, observer=reporter)
+                if reporter:
+                    reporter.close()
                 return emit({"ok": True, **orchestrator.render_plan(completed)}, args.json)
+            if reporter:
+                reporter.close()
             return emit({"ok": True, **orchestrator.render_plan(started), "next": "execute via cdx adapter"}, args.json)
         if args.command == "status":
             return emit({"objectives": [orchestrator.render_plan(item) for item in store.list(args.limit)]}, args.json)

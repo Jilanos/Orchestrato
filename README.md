@@ -2,7 +2,7 @@
 
 Orchestrato is a local conversational supervisor for software development. It presents one operator-facing CLI while coordinating specialized planning, implementation, recovery, and review agents through [cdx-manager](https://github.com/AlexAgo83/cdx-manager), with durable project intent and task state managed by [Logics Manager](https://github.com/AlexAgo83/logics-manager).
 
-The project is currently in product and architecture definition. The first MVP workflow is ready for implementation; no production CLI has been released yet.
+The project currently ships a local, dependency-light MVP CLI. It supports deterministic routing, explicit approval, persisted state, and opt-in provider execution; the richer long-running control plane remains a later milestone.
 
 ## Why
 
@@ -19,7 +19,7 @@ Orchestrato makes those decisions explicit and inspectable:
 
 ## MVP
 
-The first release is a Python CLI with one-shot and interactive modes. It will support a single repository, local subprocess execution, local SQLite persistence, fake-runtime contract tests, and a compact Rich status display.
+The first release is a Python CLI with one-shot and interactive modes. It supports a single repository, local subprocess execution, local SQLite persistence, fake-runtime contract tests, and an optional Rich live status display.
 
 A full-screen TUI, distributed workers, concurrent writes, hosted control plane, and unattended deployment are intentionally deferred.
 
@@ -93,12 +93,21 @@ The first vertical slice is now available as a dependency-light Python CLI:
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install -e '.[dev]'
+python3 -m pip install -e '.[dev]'
 orchestrato --root . --json route "Design the orchestration architecture"
 orchestrato --root . --json plan "Implement the first CLI vertical slice"
 orchestrato --root . status
 orchestrato --root . repl
-python -m pytest
+python3 -m pytest
 ```
 
-The CLI persists local state under `.orchestrato/state.db`, which is ignored by Git. It currently exposes planning, deterministic routing, approval-aware run state, inspection, a compact REPL, bounded retries, a worktree writer lock, and offline cdx/Logics adapter contracts. Live provider execution is opt-in with `run --execute`.
+The CLI persists local state under `.orchestrato/state.db`, which is ignored by Git. It currently exposes planning, deterministic routing, approval-aware run state, inspection, a compact REPL, bounded retries, a worktree writer lock, and offline cdx/Logics adapter contracts. Live provider execution is opt-in with `run --execute`. Install `.[console]` to render the live timeline as a Rich table; the default fallback is line-oriented and dependency-free.
+
+For a visible execution timeline, add `--live`. Progress is written to stderr so JSON on stdout remains machine-readable; the same events are persisted and can be inspected afterward:
+
+```bash
+orchestrato --root . --json run --yes --live --execute "Implement the bounded task"
+orchestrato --root . --json inspect <objective_id>
+```
+
+The live view reports the selected role/provider, approval, handoff, cdx selection, provider execution liveness, run completion, retries, and terminal state. Provider activity is reported as waiting when cdx has not supplied a structured stream; no percentage is fabricated.

@@ -32,3 +32,22 @@ def test_store_rejects_invalid_transition(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="Invalid transition"):
         store.transition(objective.objective_id, "completed")
     store.close()
+
+
+def test_store_reopens_live_evidence_events(tmp_path: Path) -> None:
+    store = EventStore(tmp_path / "state.db")
+    objective = store.create("Observe a feature")
+    recorded = store.record_event(objective.objective_id, "agent_activity", {
+        "phase": "validation",
+        "output": "x" * 15000,
+        "api_token": "secret-value",
+    })
+    assert recorded["kind"] == "agent_activity"
+    store.close()
+
+    reopened = EventStore(tmp_path / "state.db")
+    payload = reopened.events(objective.objective_id)[-1]["payload_json"]
+    assert "secret-value" not in payload
+    assert '"output":' in payload
+    assert "..." in payload
+    reopened.close()

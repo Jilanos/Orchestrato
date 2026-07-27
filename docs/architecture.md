@@ -84,7 +84,7 @@ Uses only stable machine-readable commands:
 - `cdx run-report <run_id> --json`;
 - `cdx runs --json` when reconciliation is required.
 
-The adapter validates schemas and maps external errors into typed domain failures. It stores cdx run IDs and artifact paths, not provider credentials or raw account data.
+The adapter validates schemas and maps external errors into typed domain failures. It stores cdx run IDs and artifact paths, not provider credentials or raw account data. During `cdx run`, it emits normalized selection, start, completion, and waiting events. When cdx has no structured stream, it polls `cdx runs --limit 5 --json` at a bounded interval and reports any active run as an observation; the completed `cdx run` response remains authoritative.
 
 ### Logics adapter
 
@@ -99,6 +99,12 @@ It never hand-edits managed indicators, lineage, status, or Mermaid signatures.
 ### Event store
 
 Persists conversations, objectives, steps, routes, approvals, external references, normalized outcomes, usage, and failure classifications. Raw provider artifacts remain in cdx-manager.
+
+### Live execution observation
+
+`orchestrato run --live` attaches a local observer to the same event-publication boundary used for persistence. The CLI writes its timeline to stderr, preserving stdout for `--json` output. With the optional `console` dependency it renders the most recent events as a Rich table; otherwise it emits line-oriented events without an additional dependency.
+
+Each observation receives the SQLite event sequence and timestamp before it reaches the reporter, so `orchestrato inspect <objective_id>` can reconstruct the recorded timeline after the process exits. Payloads are recursively redacted for credential-like keys, long strings are shortened, and oversized payloads are summarized. A waiting event is only liveness evidence while provider streaming is unavailable; the interface deliberately does not infer completion or a progress percentage from it.
 
 ## Orchestration state machine
 
