@@ -25,6 +25,38 @@ def test_execute_persists_handoff_and_completes(tmp_path: Path) -> None:
     store.close()
 
 
+def test_execute_persists_usage_and_stops_for_required_review(tmp_path: Path) -> None:
+    store = EventStore(tmp_path / "state.db")
+    app = Orchestrator(store, PolicyRouter())
+    planned = app.plan("Implement a database schema migration")
+    app.approve_and_start(planned.objective_id)
+    completed = app.execute(
+        planned.objective_id,
+        root=tmp_path,
+        cdx=CdxAdapter(runner=FakeRunner({
+            "ok": True,
+            "action": "run",
+            "run_id": "run-cost-1",
+            "duration_seconds": 4.2,
+            "usage": {
+                "input_tokens": 100,
+                "cached_input_tokens": 80,
+                "output_tokens": 20,
+                "reasoning_tokens": 5,
+                "total_tokens": 120,
+            },
+        })),
+    )
+    assert completed.state == "reviewing"
+    evidence = [event for event in store.events(planned.objective_id) if event["kind"] == "cost_of_pass"]
+    assert len(evidence) == 1
+    assert "run-cost-1" in evidence[0]["payload_json"]
+    assert "new_input_tokens" in evidence[0]["payload_json"]
+    accepted = app.finalize_review(planned.objective_id, accepted=True)
+    assert accepted.state == "completed"
+    store.close()
+
+
 def test_execute_publishes_live_events_and_redacts_payload(tmp_path: Path) -> None:
     store = EventStore(tmp_path / "state.db")
     app = Orchestrator(store, PolicyRouter())
@@ -40,7 +72,10 @@ def test_execute_publishes_live_events_and_redacts_payload(tmp_path: Path) -> No
     )
 
     assert completed.state == "completed"
-    assert [event["kind"] for event in observed] == ["run_started", "handoff_written", "run_completed"]
+    assert [event["kind"] for event in observed] == ["run_started", "handoff_written", "cost_of_pass", "run_completed"]
+    handoff = (tmp_path / ".orchestrato/handoffs" / f"{planned.objective_id}.txt").read_text()
+    assert '"objective": "Implement the first feature"' in handoff
+    assert any(event["kind"] == "cost_of_pass" for event in store.events(planned.objective_id))
     persisted = store.events(planned.objective_id)
     assert any(event["kind"] == "run_started" for event in persisted)
     store.record_event(planned.objective_id, "provider_evidence", {"access_token": "do-not-store"})

@@ -1,0 +1,128 @@
+{
+  "title": "Measure and optimize Orchestrato cost of pass",
+  "references": [
+    "docs/agent-orchestration-benchmark-2026-07-27.md",
+    "docs/architecture.md",
+    "/home/paul/dev/WORK/orchestrato-cost-of-pass"
+  ],
+  "request": {
+    "complexity": "High",
+    "theme": "Token-efficient orchestration",
+    "needs": [
+      "Measure the token, latency, and quality cost of each orchestration route.",
+      "Select the least expensive route that still passes task-specific acceptance checks.",
+      "Keep agent handoffs sufficient for execution without replaying whole transcripts."
+    ],
+    "context": [
+      "The 2026-07-27 exploratory benchmark found direct Terra lower-token than fixed multi-agent chains on a bounded coding task.",
+      "Total tokens include cached input and must not be treated as a direct billing value.",
+      "Live provider runs are opt-in; deterministic tests must not require provider accounts."
+    ],
+    "acceptance_criteria": [
+      "AC1: Orchestrato persists normalized per-run usage including new input, cached input, cache writes when available, output, reasoning, duration, route, retries, and validation outcome.",
+      "AC2: Orchestrato builds role-specific bounded handoff packets from explicit task references and configurable limits, without injecting full workflow or transcript history by default.",
+      "AC3: Policy can select direct execution by default and escalate planning, review, or recovery only from explicit risk, validation, or failure evidence.",
+      "AC4: A reproducible benchmark harness compares direct minimal-context, direct expanded-context, adaptive orchestration, and fixed plan-implement-review routes without running providers by default.",
+      "AC5: Benchmark reports compute pass rate, cost-of-pass, total/new/cached/output tokens, latency, retries, and human-rework fields, and preserve raw run references.",
+      "AC6: Contract and analysis tests cover usage normalization, context budgets, escalation gates, aggregation, and no-live-run defaults."
+    ]
+  },
+  "product": {
+    "title": "Cost-of-pass control plane",
+    "overview": "Make Orchestrato choose and evidence the lowest-cost orchestration route that meets explicit delivery quality gates.",
+    "goals": [
+      "Treat orchestration complexity as a budgeted, evidence-driven decision.",
+      "Separate provider load, billed-token inputs, latency, and successful delivery outcomes.",
+      "Make bounded, role-specific context a first-class handoff artifact.",
+      "Provide reproducible route comparisons for future routing policy changes."
+    ],
+    "non_goals": [
+      "Infer provider pricing or publish a universal model ranking.",
+      "Run live providers automatically in CI or during local unit tests.",
+      "Replace cdx-manager usage capture or Logics workflow ownership."
+    ]
+  },
+  "backlog_items": [
+    {
+      "title": "Persist normalized cost-of-pass run evidence",
+      "priority": "High",
+      "complexity": "High",
+      "theme": "Observability",
+      "request_acs": ["AC1"],
+      "problem": ["Existing run persistence does not yet expose a complete, comparable usage and outcome record."],
+      "scope_in": ["Typed usage model", "normalized cdx usage extraction", "event-store persistence", "safe inspection output"],
+      "scope_out": ["Provider billing integration", "storage of raw prompts or credentials"],
+      "acceptance_criteria": ["AC1: Each completed execution persists normalized token categories, route, duration, retries, validation status, and raw run reference."]
+    },
+    {
+      "title": "Build bounded role-specific context packets",
+      "priority": "High",
+      "complexity": "High",
+      "theme": "Context engineering",
+      "request_acs": ["AC2"],
+      "problem": ["Current execution writes a minimal prompt and does not integrate the available Logics context-pack adapter."],
+      "scope_in": ["Task-packet schema", "Logics context-pack consumption", "per-role projections", "size limits", "structured summaries"],
+      "scope_out": ["Full transcript replay", "automatic semantic retrieval service"],
+      "acceptance_criteria": ["AC1: Planner, executor, reviewer, and recovery prompts receive only their role-relevant packet within configured limits.", "AC2: Oversized context is reduced to references and a structured summary with an observable truncation reason."]
+    },
+    {
+      "title": "Add adaptive route and escalation gates",
+      "priority": "High",
+      "complexity": "High",
+      "theme": "Routing policy",
+      "request_acs": ["AC3"],
+      "problem": ["The routing policy identifies roles but does not yet optimize the direct path and conditional escalation around risk and evidence."],
+      "scope_in": ["Task-risk signals", "direct path", "planning/review gates", "bounded recovery", "explainable route decisions"],
+      "scope_out": ["Unbounded multi-agent swarms", "model-provider pricing predictions"],
+      "acceptance_criteria": ["AC1: Low-risk bounded work takes a direct path unless an explicit policy signal requires escalation.", "AC2: Review and recovery run only after policy-required risk evidence or failed deterministic validation."]
+    },
+    {
+      "title": "Create reproducible route-comparison harness",
+      "priority": "High",
+      "complexity": "Medium",
+      "theme": "Benchmarking",
+      "request_acs": ["AC4"],
+      "problem": ["The exploratory benchmark is valuable but lacks a versioned harness and a no-cost dry-run workflow."],
+      "scope_in": ["Scenario manifest", "route matrix", "dry-run validation", "opt-in live launcher", "isolated artifacts under WORK"],
+      "scope_out": ["Automatic paid live execution", "benchmarking unrelated repositories without explicit setup"],
+      "acceptance_criteria": ["AC1: The harness defines the four comparison routes and validates all manifests without provider execution.", "AC2: Live execution requires an explicit --execute flag and writes only under the designated WORK directory."]
+    },
+    {
+      "title": "Aggregate cost-of-pass comparison reports",
+      "priority": "Medium",
+      "complexity": "Medium",
+      "theme": "Benchmark analysis",
+      "request_acs": ["AC5"],
+      "problem": ["Route results need a common outcome-aware aggregation instead of a total-token-only comparison."],
+      "scope_in": ["Schema validation", "aggregation", "cost-of-pass calculations", "CSV and Markdown reporting", "confidence and limitation fields"],
+      "scope_out": ["Pricing advice", "statistical claims below the configured sample threshold"],
+      "acceptance_criteria": ["AC1: A report exposes pass rate and each token category per route alongside latency, retries, and human-rework fields.", "AC2: Cost-of-pass is undefined and clearly reported when a route has no successful run."]
+    },
+    {
+      "title": "Test cost-aware orchestration contracts",
+      "priority": "High",
+      "complexity": "Medium",
+      "theme": "Quality assurance",
+      "request_acs": ["AC6"],
+      "problem": ["Cost and context controls need deterministic regression coverage before live benchmarking is trusted."],
+      "scope_in": ["Unit tests", "fake cdx and Logics contracts", "fixture run records", "harness dry-run tests"],
+      "scope_out": ["Live provider accounts", "acceptance claims from synthetic fixtures"],
+      "acceptance_criteria": ["AC1: Tests cover normalized usage, packet limits, route gates, aggregation, and explicit live-run opt-in.", "AC2: The default test command performs no provider call and passes with fake executables."]
+    }
+  ],
+  "orchestration_task": {
+    "title": "Deliver cost-of-pass control plane and benchmark harness",
+    "plan": [
+      "Establish usage and outcome schemas plus persistence contracts.",
+      "Implement bounded role-specific handoffs and adaptive route gates.",
+      "Create the isolated benchmark harness and validate dry-run behavior.",
+      "Add aggregation and deterministic contract tests.",
+      "Run repository validation and record benchmark-readiness evidence."
+    ]
+  },
+  "context_pack": {
+    "out": "logics/context-packs/cost_of_pass_control_plane.json",
+    "mode": "summary-only",
+    "profile": "normal"
+  }
+}

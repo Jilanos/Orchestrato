@@ -53,7 +53,10 @@ def classify(text: str) -> TaskIntent:
         return TaskIntent(text, "recovery", "high", True)
     if any(word in normalized for word in ("plan", "architecture", "roadmap", "design", "decompose")):
         return TaskIntent(text, "planning", "medium", False)
-    return TaskIntent(text, "implementation", "medium", True)
+    high_risk = any(word in normalized for word in (
+        "migration", "schema", "database", "concurrency", "distributed", "external integration", "release-critical",
+    ))
+    return TaskIntent(text, "implementation", "high" if high_risk else "medium", True)
 
 
 class PolicyRouter:
@@ -86,6 +89,20 @@ class PolicyRouter:
             "recovery": (),
             "operations": (),
         }[selected_role]
+        risk_signals = tuple(signal for signal in (
+            "high_risk", "review_requested", "planning_requested", "cross_system",
+        ) if (
+            signal == "high_risk" and intent.risk == "high"
+        ) or (
+            signal == "review_requested" and intent.kind == "review"
+        ) or (
+            signal == "planning_requested" and intent.kind == "planning"
+        ) or (
+            signal == "cross_system" and any(word in intent.text.casefold() for word in ("service", "integration", "distributed"))
+        ))
+        planning_required = intent.kind == "planning" or intent.risk == "high"
+        review_required = intent.kind == "review" or intent.risk == "high"
+        route_mode = "escalated" if planning_required or review_required else "direct"
         return RouteDecision(
             intent=intent,
             profile=self.profiles[selected_role],
@@ -93,4 +110,8 @@ class PolicyRouter:
             reason=f"Matched intent `{intent.kind}` with risk `{intent.risk}`; selected role `{selected_role}`.",
             approval_required=approval_required,
             fallback_roles=fallback_roles,
+            planning_required=planning_required,
+            review_required=review_required,
+            route_mode=route_mode,
+            risk_signals=risk_signals,
         )

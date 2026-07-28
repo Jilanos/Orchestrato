@@ -16,6 +16,7 @@ Orchestrato makes those decisions explicit and inspectable:
 - durable request, backlog, task, and context handoffs through Logics Manager;
 - finite retries, approvals, independent review, and one writer per worktree;
 - local event history that can resume after interruption.
+- normalized cost-of-pass evidence and configurable bounded handoffs.
 
 ## MVP
 
@@ -111,3 +112,16 @@ orchestrato --root . --json inspect <objective_id>
 ```
 
 The live view reports the selected role/provider, approval, handoff, cdx selection, provider execution liveness, run completion, retries, and terminal state. Provider activity is reported as waiting when cdx has not supplied a structured stream; no percentage is fabricated.
+
+For a bounded Logics handoff, pass one or more refs and optionally set the packet limit:
+
+```bash
+orchestrato --root . --json run --yes --execute \
+  --logics-ref req_003_measure_and_optimize_orchestrato_cost_of_pass \
+  --context-max-chars 12000 \
+  "Implement the cost-of-pass task"
+```
+
+Each completed execution records a `cost_of_pass` event. Its token fields are
+provider evidence, not a monetary invoice; route comparisons should use
+cost-of-pass tokens together with pass rate, duration, retries, and validation.

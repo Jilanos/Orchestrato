@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Any
 
 from .adapters.cdx import CdxAdapter
-from .models import Objective, RouteDecision
+from .context import DEFAULT_MAX_CHARS, build_handoff_packet
+from .models import Objective, RouteDecision, UsageRecord
 from .policy import PolicyRouter
 from .store import EventStore
 
@@ -52,27 +53,48 @@ class Orchestrator:
             self.store.transition(objective_id, "verifying", result or {})
             objective = self.store.get(objective_id)
         if objective.state == "verifying":
-            self.store.transition(objective_id, "completed", result or {})
+            if objective.route and objective.route.review_required:
+                self.store.transition(objective_id, "reviewing", result or {})
+            else:
+                self.store.transition(objective_id, "completed", result or {})
         return self.store.get(objective_id)
 
-    def execute(self, objective_id: str, *, root: Path, cdx: CdxAdapter | None = None, observer=None) -> Objective:
+    def finalize_review(self, objective_id: str, *, accepted: bool, evidence: dict[str, Any] | None = None) -> Objective:
+        objective = self.store.get(objective_id)
+        if objective.state != "reviewing":
+            raise ValueError(f"Objective is not awaiting review: {objective.state}")
+        payload = {"accepted": accepted, **(evidence or {})}
+        self.store.transition(objective_id, "completed" if accepted else "recovering", payload)
+        return self.store.get(objective_id)
+
+    def execute(
+        self,
+        objective_id: str,
+        *,
+        root: Path,
+        cdx: CdxAdapter | None = None,
+        observer=None,
+        context_pack: dict[str, Any] | None = None,
+        context_max_chars: int = DEFAULT_MAX_CHARS,
+        attempt: int = 1,
+    ) -> Objective:
         objective = self.store.get(objective_id)
         if objective.state != "executing" or objective.route is None:
             raise ValueError(f"Objective is not executable: {objective.state}")
         handoff_dir = root / ".orchestrato" / "handoffs"
         handoff_dir.mkdir(parents=True, exist_ok=True)
         prompt_file = handoff_dir / f"{objective_id}.txt"
+        packet = build_handoff_packet(
+            role=objective.route.profile.role,
+            objective=objective.text,
+            context_pack=context_pack,
+            max_chars=context_max_chars,
+            extra={"effort": objective.route.effort, "permission": objective.route.profile.permission},
+        )
         prompt_file.write_text(
-            "\n".join(
-                [
-                    f"Role: {objective.route.profile.label}",
-                    f"Objective: {objective.text}",
-                    f"Reasoning effort: {objective.route.effort}",
-                    f"Permission: {objective.route.profile.permission}",
-                    "Return a concise structured report with changed files, validation, blockers, and risks.",
-                ]
-            )
-            + "\n",
+            "Role: " + objective.route.profile.label + "\n"
+            "Return a concise structured report with changed files, validation, blockers, and risks.\n"
+            "Bounded task packet:\n" + packet.render() + "\n",
             encoding="utf-8",
         )
         self.publish(objective_id, "run_started", {
@@ -83,7 +105,13 @@ class Orchestrator:
             "permission": objective.route.profile.permission,
             "cwd": str(root),
         }, observer)
-        self.publish(objective_id, "handoff_written", {"prompt_file": str(prompt_file)}, observer)
+        self.publish(objective_id, "handoff_written", {
+            "prompt_file": str(prompt_file),
+            "role": packet.role,
+            "context_chars": len(packet.render()),
+            "context_truncated": packet.truncated,
+            "truncation_reason": packet.truncation_reason,
+        }, observer)
         adapter = cdx or CdxAdapter(on_event=lambda kind, payload: self.publish(objective_id, kind, payload, observer))
         try:
             selection = adapter.select(objective.route, cwd=root)
@@ -94,7 +122,29 @@ class Orchestrator:
             self.store.transition(objective_id, "recovering", {"diagnostic": diagnostic, "prompt_file": str(prompt_file)})
             raise ExecutionError(f"cdx execution failed: {diagnostic.get('message', str(exc))}", diagnostic) from exc
         result = {"selection": selection, "run": result, "prompt_file": str(prompt_file)}
-        self.publish(objective_id, "run_completed", {"state": "completed", "run": result.get("run", {})}, observer)
+        run_payload = result.get("run", {})
+        usage = UsageRecord.from_payload(run_payload.get("usage", run_payload))
+        validation_status = str(run_payload.get("validation_status", "not_reported"))
+        cost_evidence = self.store.record_cost_evidence(
+            objective_id,
+            usage=usage,
+            route=objective.route,
+            duration_seconds=run_payload.get("duration_seconds"),
+            retries=max(0, attempt - 1),
+            validation_status=validation_status,
+            raw_run_ref=run_payload.get("run_id"),
+        )
+        if observer:
+            observer({
+                "id": cost_evidence["id"],
+                "objective_id": objective_id,
+                "kind": "cost_of_pass",
+                "payload": json_payload(cost_evidence),
+                "created_at": cost_evidence["created_at"],
+            })
+        result["cost_of_pass"] = cost_evidence
+        next_state = "reviewing" if objective.route.review_required else "completed"
+        self.publish(objective_id, "run_completed", {"state": next_state, "run": result.get("run", {})}, observer)
         return self.complete(objective_id, result)
 
     def publish(self, objective_id: str, kind: str, payload: dict[str, Any], observer=None) -> None:
@@ -121,3 +171,13 @@ def database_for(root: Path, config: dict[str, Any]) -> Path:
     configured = config.get("project", {}).get("database", ".orchestrato/state.db")
     path = Path(configured)
     return path if path.is_absolute() else root / path
+
+
+def json_payload(event: dict[str, Any]) -> dict[str, Any]:
+    """Decode the bounded event payload without exposing store internals."""
+    raw = event.get("payload_json", "{}")
+    try:
+        parsed = json.loads(raw)
+    except (TypeError, json.JSONDecodeError):
+        return {"event_id": event.get("id")}
+    return {"event_id": event.get("id"), **parsed}

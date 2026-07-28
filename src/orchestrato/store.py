@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from .models import Objective, RouteDecision
+from .models import Objective, RouteDecision, UsageRecord
 from .observability import bounded_payload
 
 
@@ -113,6 +113,27 @@ class EventStore:
         row = self._db.execute("SELECT * FROM events WHERE id = last_insert_rowid()").fetchone()
         return dict(row)
 
+    def record_cost_evidence(
+        self,
+        objective_id: str,
+        *,
+        usage: UsageRecord,
+        route: RouteDecision,
+        duration_seconds: float | None,
+        retries: int,
+        validation_status: str,
+        raw_run_ref: str | None,
+    ) -> dict[str, Any]:
+        """Persist the comparable, redacted cost-of-pass evidence for a run."""
+        return self.record_event(objective_id, "cost_of_pass", {
+            "usage": usage.to_dict(),
+            "route": route.to_dict(),
+            "duration_seconds": duration_seconds,
+            "retries": max(0, retries),
+            "validation_status": validation_status,
+            "raw_run_ref": raw_run_ref,
+        })
+
     def _event(self, objective_id: str, kind: str, from_state: str | None, to_state: str | None, payload: dict[str, Any]) -> None:
         self._db.execute(
             "INSERT INTO events(objective_id, kind, from_state, to_state, payload_json, created_at) VALUES (?, ?, ?, ?, ?, ?)",
@@ -130,4 +151,8 @@ def _route_from_dict(raw: dict[str, Any] | None) -> RouteDecision | None:
         profile=AgentProfile(**profile_raw),
         effort=raw["effort"], reason=raw["reason"],
         approval_required=raw["approval_required"], fallback_roles=tuple(raw["fallback_roles"]),
+        planning_required=raw.get("planning_required", False),
+        review_required=raw.get("review_required", False),
+        route_mode=raw.get("route_mode", "direct"),
+        risk_signals=tuple(raw.get("risk_signals", ())),
     )

@@ -26,3 +26,18 @@ def test_operator_can_override_role_and_effort() -> None:
     route = PolicyRouter().route("Implement the parser", role="specialist", effort="low")
     assert route.profile.role == "specialist"
     assert route.effort == "low"
+
+
+def test_bounded_implementation_stays_on_direct_route() -> None:
+    route = PolicyRouter().route("Implement a parser in one module")
+    assert route.route_mode == "direct"
+    assert route.planning_required is False
+    assert route.review_required is False
+
+
+def test_high_risk_change_requires_escalation_evidence() -> None:
+    route = PolicyRouter().route("Implement a database schema migration")
+    assert route.route_mode == "escalated"
+    assert route.planning_required is True
+    assert route.review_required is True
+    assert "high_risk" in route.risk_signals

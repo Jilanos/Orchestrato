@@ -33,6 +33,8 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--live", action="store_true", help="Print execution events as they occur to stderr")
     run.add_argument("--role")
     run.add_argument("--effort", choices=("low", "medium", "high"))
+    run.add_argument("--logics-ref", action="append", default=[], help="Logics ref to include in the bounded context pack (repeatable)")
+    run.add_argument("--context-max-chars", type=int, default=None, help="Maximum rendered handoff context size")
 
     status = sub.add_parser("status", help="List recent objectives")
     status.add_argument("--limit", type=int, default=20)
@@ -42,6 +44,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     approve = sub.add_parser("approve", help="Approve a planned objective")
     approve.add_argument("objective_id")
+    review = sub.add_parser("review", help="Finalize an objective waiting for review")
+    review.add_argument("objective_id")
+    review.add_argument("--reject", action="store_true", help="Reject the review and return the objective to recovery")
     cancel = sub.add_parser("cancel", help="Cancel a non-terminal objective")
     cancel.add_argument("objective_id")
 
@@ -86,7 +91,17 @@ def main(argv: list[str] | None = None) -> int:
             started = orchestrator.approve_and_start(objective.objective_id)
             orchestrator.publish(objective.objective_id, "approval_granted", {"state": started.state}, reporter)
             if args.execute:
-                completed = supervisor.execute(objective.objective_id, root=root, observer=reporter)
+                context_pack = None
+                if args.logics_ref:
+                    from .adapters.logics import LogicsAdapter
+                    context_pack = LogicsAdapter().context_pack(args.logics_ref, cwd=root)
+                completed = supervisor.execute(
+                    objective.objective_id,
+                    root=root,
+                    observer=reporter,
+                    context_pack=context_pack,
+                    context_max_chars=args.context_max_chars or int(config.get("context", {}).get("max_chars", 12000)),
+                )
                 if reporter:
                     reporter.close()
                 return emit({"ok": True, **orchestrator.render_plan(completed)}, args.json)
@@ -101,6 +116,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "approve":
             started = orchestrator.approve_and_start(args.objective_id)
             return emit({"ok": True, **orchestrator.render_plan(started)}, args.json)
+        if args.command == "review":
+            reviewed = orchestrator.finalize_review(args.objective_id, accepted=not args.reject, evidence={"actor": "operator"})
+            return emit({"ok": True, **orchestrator.render_plan(reviewed)}, args.json)
         if args.command == "cancel":
             cancelled = orchestrator.cancel(args.objective_id)
             return emit({"ok": True, **orchestrator.render_plan(cancelled)}, args.json)

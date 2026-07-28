@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from orchestrato.policy import PolicyRouter
+from orchestrato.models import UsageRecord
 from orchestrato.store import EventStore
 
 
@@ -51,3 +52,23 @@ def test_store_reopens_live_evidence_events(tmp_path: Path) -> None:
     assert '"output":' in payload
     assert "..." in payload
     reopened.close()
+
+
+def test_store_persists_normalized_cost_of_pass_evidence(tmp_path: Path) -> None:
+    store = EventStore(tmp_path / "state.db")
+    route = PolicyRouter().route("Implement a feature")
+    objective = store.create(route.intent.text)
+    event = store.record_cost_evidence(
+        objective.objective_id,
+        usage=UsageRecord(input_tokens=100, cached_input_tokens=80, new_input_tokens=20, output_tokens=10, total_tokens=110),
+        route=route,
+        duration_seconds=3.5,
+        retries=1,
+        validation_status="passed",
+        raw_run_ref="run-123",
+    )
+    assert event["kind"] == "cost_of_pass"
+    payload = store.events(objective.objective_id)[-1]["payload_json"]
+    assert "run-123" in payload
+    assert "new_input_tokens" in payload
+    store.close()

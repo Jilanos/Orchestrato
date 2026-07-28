@@ -86,6 +86,8 @@ Uses only stable machine-readable commands:
 
 The adapter validates schemas and maps external errors into typed domain failures. It stores cdx run IDs and artifact paths, not provider credentials or raw account data. During `cdx run`, it emits normalized selection, start, completion, and waiting events. When cdx has no structured stream, it polls `cdx runs --limit 5 --json` at a bounded interval and reports any active run as an observation; the completed `cdx run` response remains authoritative.
 
+Completed runs also persist one normalized `cost_of_pass` evidence event with route, duration, retries, validation status, raw run reference, and token categories (`input`, `new_input`, `cached_input`, `cache_write`, `output`, `reasoning`, and `total`). Provider pricing is deliberately not inferred by Orchestrato.
+
 ### Logics adapter
 
 Uses canonical workflow commands:
@@ -180,6 +182,8 @@ Agents receive a bounded task packet, not the full orchestration database:
 - prior run report or failure evidence when relevant;
 - required structured response shape;
 - explicit non-goals and stop conditions.
+
+The packet is projected by role and bounded by a configurable character limit. Oversized packets retain only references and a summary, with a truncation reason recorded in the handoff event. Logics context is fetched only when refs are supplied to the run command; no full transcript replay is the default.
 
 Implementation agents return changed files, validation, blockers, residual risks, and a concise summary. Review agents return severity, file and line when available, rationale, and recommended action. Orchestrato treats free-form prose as display content, not control instructions.
 

@@ -5,6 +5,9 @@ database = ".orchestrato/state.db"
 default_effort = "medium"
 max_attempts = 2
 
+[context]
+max_chars = 12000
+
 [roles.planner]
 label = "Terra"
 provider = "codex"

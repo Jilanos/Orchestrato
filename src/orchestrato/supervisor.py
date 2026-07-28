@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
+from typing import Any
 
 from .adapters.cdx import CdxAdapter
 from .application import Orchestrator
@@ -38,12 +39,29 @@ class Supervisor:
         self.app = app
         self.max_attempts = max(1, max_attempts)
 
-    def execute(self, objective_id: str, *, root: Path, cdx: CdxAdapter | None = None, observer=None):
+    def execute(
+        self,
+        objective_id: str,
+        *,
+        root: Path,
+        cdx: CdxAdapter | None = None,
+        observer=None,
+        context_pack: dict[str, Any] | None = None,
+        context_max_chars: int = 12000,
+    ):
         last_error: RuntimeError | None = None
         for attempt in range(1, self.max_attempts + 1):
             try:
                 with WorktreeLease(root):
-                    return self.app.execute(objective_id, root=root, cdx=cdx, observer=observer)
+                    return self.app.execute(
+                        objective_id,
+                        root=root,
+                        cdx=cdx,
+                        observer=observer,
+                        attempt=attempt,
+                        context_pack=context_pack,
+                        context_max_chars=context_max_chars,
+                    )
             except RuntimeError as exc:
                 last_error = exc
                 objective = self.app.store.get(objective_id)
