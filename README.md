@@ -24,6 +24,32 @@ The first release is a Python CLI with one-shot and interactive modes. It suppor
 
 A full-screen TUI, distributed workers, concurrent writes, hosted control plane, and unattended deployment are intentionally deferred.
 
+## Quick start
+
+Requires Python 3.11 or later. The core has no runtime dependency.
+
+```bash
+git clone https://github.com/Jilanos/Orchestrato.git
+cd Orchestrato
+python3 -m venv .venv
+. .venv/bin/activate
+python3 -m pip install -e '.[dev]'
+orchestrato --root . --json route "Design the orchestration architecture"
+orchestrato --root . plan "Implement the first CLI vertical slice"
+orchestrato --root . status
+python3 -m pytest
+```
+
+`route`, `plan` and `status` run offline. Live provider execution is opt-in with `run --execute` and needs cdx-manager and Logics Manager installed.
+
+## Tech stack
+
+Python 3.11+ standard library, SQLite for local state, setuptools packaging, pytest for tests. Optional Rich (`.[console]`) for the live status table. External tools: cdx-manager and Logics Manager.
+
+## Status
+
+Version 0.1.0.dev0. Pre-release MVP: routing, planning, approval, persisted state, bounded retries and a worktree writer lock exist. Provider execution is tested with fake runtimes. Long-running control plane, full-screen TUI and distributed workers are not built.
+
 ## Architecture
 
 ```mermaid
